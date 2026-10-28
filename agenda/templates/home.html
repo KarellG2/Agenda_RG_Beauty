@@ -1,0 +1,15 @@
+{% extends "base_template.html" %}
+
+{% block title %}Home{% endblock %}
+{% load static %}
+
+{% block content %}
+    <div class="header">
+        <img src="{% static 'assets/Icon.png' %}" alt="Logo" class="icon">
+        <h1 class="principal_title">RG Beauty</h1>
+        <nav class="navigation">
+        <li><a href="/">Home</a></li>
+    </nav>
+
+    </div>
+{% endblock %}      
