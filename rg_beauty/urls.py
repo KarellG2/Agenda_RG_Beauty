@@ -22,5 +22,8 @@ from agenda import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    
+    path('agendar_cita/', views.agendar_cita, name='agendar_cita'),
+    path('ver_citas/', views.ver_citas, name='ver_citas'),
+    path('vista_administracion/', views.vista_administracion, name='vista_administracion'),
+
 ]

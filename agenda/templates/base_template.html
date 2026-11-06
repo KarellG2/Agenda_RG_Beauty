@@ -1,20 +1,43 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RG Beauty Agenda de Citas</title>
-    <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
-    <!-- JS -->
-
-
+    <title>{% block title %}RG Beauty - Reservas{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
+
 <body>
-{% block content %}
-<p>RG Beauty</p>
-{% endblock %}
-</body>
+    <div class="app-shell">
+        <header>
+            <nav class="navbar navbar-expand-lg sticky-top site-navbar" aria-label="Navegación principal">
+                <div class="site-header container d-flex justify-content-between"><!-- div header -->
+                    <a class="navbar-brand align-items-center" href="{% url 'home' %}"> 
+                        <img src="{% static 'assets/Icon.png' %}" alt="Logo de RG Beauty" class="icon"> <!-- Logo de RG Beauty -->
+                    </a>
+                    <div class="header-buttons">
+                        <ul>
+                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>
+                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'agendar_cita' %}">Agendar cita</a></li>
+                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'ver_citas' %}">Ver citas</a></li>
+                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'vista_administracion' %}">Acceso administrativo</a></li>
+                        </ul>
+                    </div>
+
+                </div> <!-- div header -->
+            </nav> <!-- nav -->
+        </header>
+
+        <main>
+    {% block content %}
+    {% endblock %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            crossorigin="anonymous"></script>
+    </body>
 </html>

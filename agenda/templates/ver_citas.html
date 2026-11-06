@@ -1,0 +1,39 @@
+{% extends "base_template.html" %}
+
+{% block title %}Mis Citas | RG Beauty{% endblock %}
+{% block content %}
+<div class=""cliente">
+    <div class="container">
+        <h1>Mis Citas</h1>
+        {% if citas %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Servicio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cita in citas %}
+                        <tr>
+                            <td>{{ cita.nombre }}</td>
+                            <td>{{ cita.correo }}</td>
+                            <td>{{ cita.telefono }}</td>
+                            <td>{{ cita.fecha }}</td>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.servicio }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No tienes citas agendadas.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}      
