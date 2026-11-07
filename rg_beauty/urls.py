@@ -28,5 +28,8 @@ urlpatterns = [
     path('agendar_cita_admin/', views.agendar_cita_admin, name='agendar_cita_admin'),
     path('clientes_admin/', views.clientes_admin, name='clientes_admin'),
     path('servicios_admin/', views.servicios_admin, name='servicios_admin'),
+    path('notificaciones_admin/', views.notificaciones_admin, name='notificaciones_admin'),
+    path('auditoria_admin/', views.auditoria_admin, name='auditoria_admin'),
+    path('configuracion_admin/', views.configuracion_admin, name='configuracion_admin'),
 
 ]

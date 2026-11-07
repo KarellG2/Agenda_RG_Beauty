@@ -42,6 +42,29 @@
     font: 0.88rem "Segoe UI", sans-serif;
 }
 
+.admin-field {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 0 10px;
+    border: 1px solid #e6cdd8;
+    border-radius: 9px;
+    color: var(--ink);
+    background: #fffafc;
+    font: 0.8rem "Segoe UI", sans-serif;
+}
+
+.admin-field:focus {
+    border-color: var(--button);
+    outline: 3px solid color-mix(in srgb, var(--button) 14%, transparent);
+}
+
+.admin-textarea {
+    min-height: 100px;
+    padding: 10px;
+    resize: vertical;
+}
+
 .agenda-form input:focus,
 .agenda-form select:focus,
 .filters-grid input:focus,

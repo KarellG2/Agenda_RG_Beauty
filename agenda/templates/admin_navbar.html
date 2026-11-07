@@ -15,9 +15,9 @@
                 <li><a class="{% if active_page == 'agenda' %}is-active{% endif %}" href="{% url 'agendar_cita_admin' %}">Agenda</a></li>
                 <li><a class="{% if active_page == 'clientes' %}is-active{% endif %}" href="{% url 'clientes_admin' %}">Clientes</a></li>
                 <li><a class="{% if active_page == 'servicios' %}is-active{% endif %}" href="{% url 'servicios_admin' %}">Servicios</a></li>
-                <li><a href="#">Notificaciones</a></li>
-                <li><a href="#">Auditoría</a></li>
-                <li><a href="#">Configuración</a></li>
+                <li><a class="{% if active_page == 'notificaciones' %}is-active{% endif %}" href="{% url 'notificaciones_admin' %}">Notificaciones</a></li>
+                <li><a class="{% if active_page == 'auditoria' %}is-active{% endif %}" href="{% url 'auditoria_admin' %}">Auditoría</a></li>
+                <li><a class="{% if active_page == 'configuracion' %}is-active{% endif %}" href="{% url 'configuracion_admin' %}">Configuración</a></li>
             </ul>
         </div>
     </nav>

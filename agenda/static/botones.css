@@ -50,6 +50,26 @@
     font-weight: 500;
 }
 
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 13px;
+    border: 1.5px solid var(--button);
+    border-radius: 8px;
+    color: var(--button);
+    background: #fffafc;
+    font: 0.84rem "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.btn-outline:hover {
+    color: var(--button-text);
+    background: var(--button);
+}
+
 .agenda-button,
 .primary-btn,
 .filter-submit,

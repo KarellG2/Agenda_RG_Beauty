@@ -41,3 +41,15 @@ def clientes_admin(request):
 
 def servicios_admin(request):
     return render(request, 'servicios_admin.html')
+
+
+def notificaciones_admin(request):
+    return render(request, 'notificaciones_admin.html')
+
+
+def auditoria_admin(request):
+    return render(request, 'auditoria_admin.html')
+
+
+def configuracion_admin(request):
+    return render(request, 'configuracion_admin.html')

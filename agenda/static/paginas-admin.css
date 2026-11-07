@@ -27,6 +27,34 @@
     font: 0.88rem/1.5 "Segoe UI", sans-serif;
 }
 
+.admin-subsection-title {
+    margin: 24px 0 14px;
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+.admin-example-card,
+.admin-empty-state {
+    padding: 16px;
+    color: var(--muted);
+    background: #fffafc;
+    border: 1px solid #ecdde3;
+    border-radius: 11px;
+    box-shadow: 0 6px 18px rgba(93, 55, 73, 0.025);
+    font: 0.86rem/1.45 "Segoe UI", sans-serif;
+}
+
+.admin-example-card h3 {
+    margin: 0 0 7px;
+    color: var(--ink);
+    font: 0.88rem/1.35 "Segoe UI", sans-serif;
+}
+
+.admin-example-card p,
+.admin-empty-state p {
+    margin: 0;
+}
+
 @media (max-width: 640px) {
     .admin-section-page {
         width: min(100% - 32px, 1240px);

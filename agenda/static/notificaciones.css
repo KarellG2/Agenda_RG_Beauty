@@ -1,0 +1,15 @@
+.notification-examples {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.notifications-page .reminders-title {
+    margin-top: 28px;
+}
+
+@media (max-width: 760px) {
+    .notification-examples {
+        grid-template-columns: 1fr;
+    }
+}

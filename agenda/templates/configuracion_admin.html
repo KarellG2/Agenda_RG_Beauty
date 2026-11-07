@@ -1,0 +1,101 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Configuración | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'configuracion.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="configuracion" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page configuration-page">
+    <div class="admin-demo-notice" role="note">Modo de demostración: los cambios no se guardan ni se sincronizan con otros dispositivos.</div>
+
+    <section aria-labelledby="configuration-title">
+        <h1 class="admin-section-title" id="configuration-title">Configuración</h1>
+        <p class="admin-section-description">Configura lo que ven tus clientes al reservar. Los campos son ilustrativos y no guardan cambios.</p>
+
+        <div class="configuration-stack">
+            <section class="configuration-card" aria-labelledby="hours-title">
+                <h2 id="hours-title">Horarios de atención</h2>
+                <p class="configuration-note">La última hora indicada también se ofrece como inicio de una cita.</p>
+
+                <fieldset class="days-fieldset">
+                    <legend>Días disponibles</legend>
+                    <div class="days-grid">
+                        <label><input type="checkbox" checked> Lunes</label>
+                        <label><input type="checkbox" checked> Martes</label>
+                        <label><input type="checkbox" checked> Miércoles</label>
+                        <label><input type="checkbox" checked> Jueves</label>
+                        <label><input type="checkbox" checked> Viernes</label>
+                        <label><input type="checkbox" checked> Sábado</label>
+                        <label><input type="checkbox"> Domingo</label>
+                    </div>
+                </fieldset>
+
+                <div class="schedule-settings-grid">
+                    <label class="configuration-field">Primera hora<input class="admin-field" type="time" value="09:00"></label>
+                    <label class="configuration-field">Última hora<input class="admin-field" type="time" value="18:00"></label>
+                    <label class="configuration-field">Intervalo entre horas
+                        <select class="admin-field">
+                            <option>30 minutos</option>
+                            <option selected>1 hora y media</option>
+                            <option>2 horas</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="configuration-card" aria-labelledby="service-prices-title">
+                <h2 id="service-prices-title">Servicios y precios</h2>
+                <p class="configuration-note">Los servicios se muestran como datos de ejemplo; no se actualizan en el catálogo ni en la agenda.</p>
+
+                <div class="service-settings-list">
+                    <div class="service-settings-row">
+                        <label class="configuration-field">Nombre del servicio<input class="admin-field" type="text" value="Tratamiento facial"></label>
+                        <label class="configuration-field">Precio (CLP)<input class="admin-field" type="number" value="35000"></label>
+                        <button class="btn-outline" type="button">Eliminar</button>
+                    </div>
+                    <div class="service-settings-row">
+                        <label class="configuration-field">Nombre del servicio<input class="admin-field" type="text" value="Masaje relajante"></label>
+                        <label class="configuration-field">Precio (CLP)<input class="admin-field" type="number" value="42000"></label>
+                        <button class="btn-outline" type="button">Eliminar</button>
+                    </div>
+                    <div class="service-settings-row">
+                        <label class="configuration-field">Nombre del servicio<input class="admin-field" type="text" value="Manicure"></label>
+                        <label class="configuration-field">Precio (CLP)<input class="admin-field" type="number" value="18000"></label>
+                        <button class="btn-outline" type="button">Eliminar</button>
+                    </div>
+                    <div class="service-settings-row">
+                        <label class="configuration-field">Nombre del servicio<input class="admin-field" type="text" value="Diseño de cejas"></label>
+                        <label class="configuration-field">Precio (CLP)<input class="admin-field" type="number" value="15000"></label>
+                        <button class="btn-outline" type="button">Eliminar</button>
+                    </div>
+                </div>
+                <button class="btn-outline add-service-button" type="button">Agregar servicio</button>
+            </section>
+
+            <section class="configuration-card" aria-labelledby="messages-title">
+                <h2 id="messages-title">Mensajes para clientes</h2>
+                <p class="configuration-note">Estos textos son ejemplos y no se envían automáticamente por correo o WhatsApp. Puedes usar {nombre}, {servicio}, {fecha} y {hora}.</p>
+
+                <label class="configuration-field message-field">Confirmación de solicitud
+                    <textarea class="admin-field admin-textarea">¡Gracias, {nombre}! Tu solicitud para {servicio}, el {fecha} a las {hora}, quedó registrada y está pendiente de confirmación.</textarea>
+                </label>
+                <label class="configuration-field message-field">Texto del recordatorio simulado
+                    <textarea class="admin-field admin-textarea">Hola, {nombre}. Te recordamos tu hora de {servicio} el {fecha} a las {hora}.</textarea>
+                </label>
+            </section>
+        </div>
+
+        <div class="configuration-actions">
+            <button class="primary-btn" type="button">Guardar configuración</button>
+            <button class="btn-outline" type="button">Restablecer valores originales</button>
+        </div>
+    </section>
+</div>
+{% endblock %}
