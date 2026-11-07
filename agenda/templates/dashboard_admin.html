@@ -1,0 +1,84 @@
+{% extends "base_template.html" %}
+
+{% block title %}RG Beauty - Vista de la dueña{% endblock %}
+
+{% block topbar %}
+<nav class="admin-navbar" aria-label="Navegación del administrador">
+    <div class="admin-nav-container">
+        <a href="{% url 'home' %}" class="toggle-btn" aria-label="Cambiar a la vista de cliente">Vista cliente</a>
+        <ul>
+            <li><a href="{% url 'vista_administracion' %}">Dashboard</a></li>
+            <li><a href="{% url 'agendar_cita_admin' %}">Agenda</a></li>
+            <li><a href="#">Clientes</a></li>
+            <li><a href="#">Servicios</a></li>
+            <li><a href="#">Notificaciones</a></li>
+            <li><a href="#">Auditoría</a></li>
+            <li><a href="#">Configuración</a></li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-topbar">RG BEAUTY · VISTA DE LA DUEÑA</div>
+
+    <h1 class="admin-title">Panel de administración</h1>
+    <p class="admin-subtitle">Una visión clara de la agenda y del estado de las reservas.</p>
+
+    <section class="admin-section">
+        <h2>Resumen de agenda</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Citas de hoy</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Pendientes</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Confirmadas</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Canceladas</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">No asistidas</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="admin-section indicators">
+        <h2>Indicadores operacionales</h2>
+        <p class="section-note">DATOS DE DEMOSTRACIÓN. Estos tres indicadores son ejemplos ilustrativos; no son métricas calculadas de las citas reales.</p>
+
+        <div class="indicator-grid">
+            <div class="indicator-card">
+                <span class="indicator-label">Ocupación · ejemplo</span>
+                <div class="indicator-value">68 %</div>
+            </div>
+            <div class="indicator-card">
+                <span class="indicator-label">Tasa de cancelación · ejemplo</span>
+                <div class="indicator-value">12 %</div>
+            </div>
+            <div class="indicator-card">
+                <span class="indicator-label">Tiempo muerto · ejemplo</span>
+                <div class="indicator-value">4,5 h</div>
+                <small>Horas ilustrativas, no medidas.</small>
+            </div>
+        </div>
+    </section>
+
+    <section class="agenda-callout">
+        <div class="callout-text">
+            <h3>Una agenda, una sola fuente de información</h3>
+            <p>Consulta horarios y gestiona los cambios de citas en un mismo lugar.</p>
+        </div>
+        <a href="{% url 'agendar_cita_admin' %}" class="agenda-button">Ir a la agenda</a>
+    </section>
+</div>
+{% endblock %}

@@ -28,4 +28,8 @@ def agendar_cita(request):
     return render(request, 'agendar_cita.html', {'form': form})
 
 def vista_administracion(request):
-    return render(request, 'vista_administracion.html')
+    return render(request, 'dashboard_admin.html')
+
+
+def agendar_cita_admin(request):
+    return render(request, 'agendar_cita_admin.html')

@@ -13,22 +13,24 @@
 <body>
     <div class="app-shell">
         <header>
+            {% block topbar %}
             <nav class="navbar navbar-expand-lg sticky-top site-navbar" aria-label="Navegación principal">
                 <div class="site-header container d-flex justify-content-between"><!-- div header -->
                     <a class="navbar-brand align-items-center" href="{% url 'home' %}"> 
                         <img src="{% static 'assets/Icon.png' %}" alt="Logo de RG Beauty" class="icon"> <!-- Logo de RG Beauty -->
                     </a>
+                    <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Vista admin</a>
                     <div class="header-buttons">
                         <ul>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'agendar_cita' %}">Agendar cita</a></li>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'ver_citas' %}">Ver citas</a></li>
-                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'vista_administracion' %}">Acceso administrativo</a></li>
                         </ul>
                     </div>
 
                 </div> <!-- div header -->
             </nav> <!-- nav -->
+            {% endblock %}
         </header>
 
         <main>

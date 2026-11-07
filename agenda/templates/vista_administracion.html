@@ -1,64 +1,66 @@
 {% extends "base_template.html" %}
 
-{% block title %}Vista de Administración | RG Beauty{% endblock %}
+{% block title %}RG Beauty - Vista de la dueña{% endblock %}
 {% block content %}
-    <div class="second-nav-container nav-bar">
-        <ul>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Dashboard</a></li>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Agenda</a></li>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Clientes</a></li>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Servicios</a></li>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Notificaciones</a></li>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Auditoría</a></li>
-            <li class="nav-item btn btn-nav-admin"><a class="nav-link" >Configuración</a></li>
-        </ul>
-    </div>
-    <div class="container-admin">
-            <h1>Panel de Administración</h1>
-            <H2 id="admin-subtitle">Una visión clara de la agenda y del estado de las reservas.</H2>
+<div class="admin-dashboard">
+    <div class="admin-topbar">RG BEAUTY · VISTA DE LA DUEÑA</div>
 
-            <h3>Resumen de Agenda</h3>
-        <div class="card-container lg-12 md-6 sm-3">
+    <h1 class="admin-title">Panel de administración</h1>
+    <p class="admin-subtitle">Una visión clara de la agenda y del estado de las reservas.</p>
 
-            <div class="card">
-                <h4 class="card-title">0</h4>
-                <p class="card-text">Citas de Hoy</p>
+    <section class="admin-section">
+        <h2>Resumen de agenda</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Citas de hoy</span>
             </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Pendientes</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Confirmadas</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">Canceladas</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-number">0</span>
+                <span class="summary-label">No asistidas</span>
+            </div>
+        </div>
+    </section>
 
-            <div class="card">
-                <h4 class="card-title">0</h4>
-                <p class="card-text">Citas Pendientes</p>
-            </div>
+    <section class="admin-section indicators">
+        <h2>Indicadores operacionales</h2>
+        <p class="section-note">DATOS DE DEMOSTRACIÓN. Estos tres indicadores son ejemplos ilustrativos; no son métricas calculadas de las citas reales.</p>
 
-            <div class="card">
-                <h4 class="card-title">0</h4>
-                <p class="card-text">Citas Confirmadas</p>
+        <div class="indicator-grid">
+            <div class="indicator-card">
+                <span class="indicator-label">Ocupación · ejemplo</span>
+                <div class="indicator-value">68 %</div>
             </div>
+            <div class="indicator-card">
+                <span class="indicator-label">Tasa de cancelación · ejemplo</span>
+                <div class="indicator-value">12 %</div>
+            </div>
+            <div class="indicator-card">
+                <span class="indicator-label">Tiempo muerto · ejemplo</span>
+                <div class="indicator-value">4,5 h</div>
+                <small>Horas ilustrativas, no medidas.</small>
+            </div>
+        </div>
+    </section>
 
-            <div class="card">
-                <h4 class="card-title">0</h4>
-                <p class="card-text">Citas Canceladas</p>
-            </div>
-
-            <div class="card">
-                <h4 class="card-title">0</h4>
-                <p class="card-text">No Asistidas</p>
-            </div>
-
-        </div><!-- CARD-CONTAINER -->
-        <h3>Indicadores Operacionales</h3>
-        <div class="card-container">
-            <div class="card">
-                <h4 class="card-title">0</h4>
-                <p class="card-text">Tiempo ocupado</p>
-            </div>
-            <div class="card">
-                <h4 class="card-title">15%</h4>
-                <p class="card-text">Tasa de Cancelación</p>
-            </div>
-            <div class="card">
-                <h4 class="card-title">5 horas</h4>
-                <p class="card-text">Tiempo Muerto</p>
-            </div>
-    </div> <!-- ADMIN-CONTAINER -->
+    <section class="agenda-callout">
+        <div class="callout-text">
+            <h3>Una agenda, una sola fuente de información</h3>
+            <p>Consulta horarios y gestiona los cambios de citas en un mismo lugar.</p>
+        </div>
+        <a href="{% url 'agendar_cita_admin' %}" class="agenda-button">Ir a la agenda</a>
+    </section>
+</div>
 {% endblock %}

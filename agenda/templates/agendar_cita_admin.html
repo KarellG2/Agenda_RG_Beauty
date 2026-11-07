@@ -1,0 +1,167 @@
+{% extends "base_template.html" %}
+
+{% block title %}Agenda centralizada | RG Beauty{% endblock %}
+
+{% block topbar %}
+<nav class="admin-navbar" aria-label="Navegación del administrador">
+    <div class="admin-nav-container">
+        <a href="{% url 'home' %}" class="toggle-btn" aria-label="Cambiar a la vista de cliente">Vista cliente</a>
+        <ul>
+            <li><a href="{% url 'vista_administracion' %}">Dashboard</a></li>
+            <li><a href="{% url 'agendar_cita_admin' %}">Agenda</a></li>
+            <li><a href="#">Clientes</a></li>
+            <li><a href="#">Servicios</a></li>
+            <li><a href="#">Notificaciones</a></li>
+            <li><a href="#">Auditoría</a></li>
+            <li><a href="#">Configuración</a></li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="agenda-page">
+    <header class="agenda-header">
+        <p class="agenda-eyebrow">Gestión de citas</p>
+        <h1>Agenda centralizada</h1>
+        <p>Horarios y estados actualizados desde las mismas citas que aparecen en la vista cliente.</p>
+    </header>
+
+    {% if messages %}
+        <div class="agenda-messages" role="status" aria-live="polite">
+            {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="panel agenda-form-panel">
+        <h2>Registrar una cita manualmente</h2>
+        <p>Agrega una reserva para un cliente usando su teléfono de contacto.</p>
+
+        <form class="agenda-form" method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="field-group">
+                    {{ form.telefono.label_tag }}
+                    {{ form.telefono }}
+                    {{ form.telefono.errors }}
+                </div>
+
+                <div class="field-group">
+                    {{ form.nombre.label_tag }}
+                    {{ form.nombre }}
+                    {{ form.nombre.errors }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="field-group">
+                    {{ form.servicio.label_tag }}
+                    {{ form.servicio }}
+                    {{ form.servicio.errors }}
+                </div>
+
+                <div class="field-group">
+                    {{ form.fecha.label_tag }}
+                    {{ form.fecha }}
+                    {{ form.fecha.errors }}
+                </div>
+            </div>
+
+            <div class="form-row single-row">
+                <div class="field-group">
+                    {{ form.hora.label_tag }}
+                    {{ form.hora }}
+                    {{ form.hora.errors }}
+                </div>
+                <button type="submit" class="primary-btn">Registrar cita</button>
+            </div>
+        </form>
+    </section>
+
+    <form class="toggle-row" method="get" aria-label="Selector de vista">
+        <input type="hidden" name="fecha" value="{{ fecha_seleccionada|date:'Y-m-d' }}">
+        <input type="hidden" name="cliente" value="{{ cliente_busqueda }}">
+        <input type="hidden" name="servicio" value="{{ servicio_filtro }}">
+        <input type="hidden" name="estado" value="{{ estado_filtro }}">
+        <button type="submit" name="vista" value="diaria" class="toggle-tab{% if vista == 'diaria' %} active{% endif %}">Vista diaria</button>
+        <button type="submit" name="vista" value="semanal" class="toggle-tab{% if vista == 'semanal' %} active{% endif %}">Vista semanal</button>
+    </form>
+
+    <section class="panel schedule-panel">
+        <h3>Horarios disponibles</h3>
+        <p>Una cancelación o reprogramación libera el horario anterior. La disponibilidad se comprueba de nuevo al guardar.</p>
+        <div class="availability-list">
+            {% for dia in disponibilidad %}
+                <div class="availability-day">
+                    {% if vista == 'semanal' %}<h4>{{ dia.fecha|date:'l, d \d\e F'|capfirst }}</h4>{% endif %}
+                    {% if dia.horas %}
+                        <div class="availability-slots">
+                            {% for hora in dia.horas %}<span>{{ hora|time:'H:i' }}</span>{% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="no-slots">Sin horarios disponibles</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel filters-panel">
+        <h2>Buscar y gestionar citas</h2>
+
+        <form class="filters-grid" method="get">
+            <input type="hidden" name="vista" value="{{ vista }}">
+            <div class="filter-field">
+                <label for="filter-fecha">Fecha</label>
+                <input id="filter-fecha" name="fecha" type="date" value="{{ fecha_seleccionada|date:'Y-m-d' }}">
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-cliente">Cliente</label>
+                <input id="filter-cliente" name="cliente" type="search" value="{{ cliente_busqueda }}">
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-servicio">Servicio</label>
+                <select id="filter-servicio" name="servicio">
+                    <option value="">Todos los servicios</option>
+                    {% for servicio in servicios %}
+                        <option value="{{ servicio.pk }}"{% if servicio_filtro == servicio.pk|stringformat:'s' %} selected{% endif %}>{{ servicio.nombre_s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-estado">Estado</label>
+                <select id="filter-estado" name="estado">
+                    <option value="">Todos los estados</option>
+                    {% for value, label in estados %}
+                        <option value="{{ value }}"{% if estado_filtro == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="filter-submit">Aplicar filtros</button>
+                <a href="{% url 'agendar_cita_admin' %}?fecha={{ fecha_seleccionada|date:'Y-m-d' }}&amp;vista={{ vista }}">Limpiar filtros</a>
+            </div>
+        </form>
+
+        <div class="appointment-results" aria-live="polite">
+            {% for reserva in reservas %}
+                <article class="appointment-item">
+                    <div>
+                        <h3>{{ reserva.id_cliente.nombre_c }}</h3>
+                        <p>{{ reserva.id_personal_servicio.id_servicio.nombre_s }} · {{ reserva.id_personal.nombre }}</p>
+                        <p>{{ reserva.fecha|date:'d-m-Y' }} · {{ reserva.hora|time:'H:i' }} · {{ reserva.id_cliente.telefono }}</p>
+                    </div>
+                    <span class="appointment-status status-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span>
+                </article>
+            {% empty %}
+                <div class="filters-empty">
+                    <p>No hay citas para estos filtros. Prueba otra fecha o quita algún filtro.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

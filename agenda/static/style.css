@@ -1,94 +1,82 @@
 :root {
     --ink: #422d36;
-    --muted: #69545d;
+    --muted: #6d4d58;
     --clay: #815068;
-    --dark: #693a52;
-    --sage: #F1E4E9;
+    --dark: #5d3749;
+    --sage: #f3ecec;
+    --panel: #f4efef;
+    --line: #d9c7cc;
+    --button: #6d4657;
     --danger: #8b344a;
-    --grey: #f2ecef; 
+    --grey: #f5f0f1;
+    --soft: #f2e8ea;
 }
 
-
+* {
+    box-sizing: border-box;
+}
 
 body, html {
     background-color: var(--sage);
-    font-family: sans-serif;
+    font-family: "Georgia", "Times New Roman", serif;
     min-height: 100vh;
     margin: 0;
+    color: var(--ink);
 }
+
 .app-shell {
     background-color: var(--sage);
     width: 100%;
     min-height: 100vh;
 }
+
 .site-header {
     background-color: var(--sage);
     max-width: 100%;
-    max-height: 100%;
-    margin-left: 0;
-    margin-right: 0;
+    margin: 0;
     padding-left: 0;
+    padding-right: 0;
 }
+
 .site-navbar {
     background-color: var(--sage) !important;
     box-shadow: none !important;
     border: 0;
 }
 
+.toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--button);
+    background: #fffafc;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.2s ease-in-out;
+}
+
+.toggle-btn:hover {
+    background: var(--button);
+    color: #fff;
+    text-decoration: none;
+}
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--ink);
-    font-weight: 575;
     margin-top: 0;
     margin-bottom: 10px;
-    font-family: sans-serif;
-}
-/* ESTILOS NAVBAR */
-#principal-title {
-    color: #85566F;
-    margin: 0;
-    font-size: 30px;
-    font-weight: bold;
-    font-family: sans-serif;
-}
-.icon {
-    width: 15%; 
-}
-.navbar-nav{
-    display: flex-start;
-    align-items: center;
-    justify-content: center;
-}
-.navbar-nav .nav-link {
-    color: var(--ink);
-    font-weight: 500;
-    text-decoration: none;
-    display: flex-start;
+    font-weight: 700;
 }
 
-.navbar-nav .nav-link:hover {
-    color: var(--clay);
+.icon {
+    width: 15%;
 }
-.second-nav-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-}
-/* BOTONES  */
-.btn-primary {
-    background-color: var(--clay) !important;
-    color: #fff !important;
-    border: none !important;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 100px;
-    transition: all 0.2s ease-in-out;
-}
-.btn-primary:hover {
-    background-color: var(--dark) !important;
-    transform: scale(1.05);
-}
+
 .header-buttons ul {
     list-style: none;
     display: flex;
@@ -97,123 +85,590 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
     padding: 0;
 }
+
 .header-buttons .nav-link {
     white-space: nowrap;
 }
-.btn-nav{
+
+.btn-nav {
     background-color: transparent;
     color: var(--ink);
-    border: 4px solid var(--clay);
+    border: 1px solid var(--clay);
     padding: 8px 16px;
     font-size: 14px;
     font-weight: 500;
-    border-radius: 100px;
+    border-radius: 999px;
     transition: all 0.2s ease-in-out;
 }
+
 .btn-nav:hover {
     background-color: var(--clay);
     color: var(--sage);
 }
-.btn-nav-admin{
+
+.btn-nav-admin {
     background-color: transparent;
     color: var(--ink);
     border: transparent;
     padding: 8px 16px;
     font-size: 20px;
     font-weight: 500;
-    border-radius: 100px;
-    transition: all 0.2s ease-in-out;
-}
-.btn-nav-admin:hover {
-    background-color: var(--clay);
-    color: var(--sage);
+    border-radius: 999px;
 }
 
-/* CARDS */
-.card {
-    border: 1px solid var(--muted);
-    background-color: var(--grey);
-    border-radius: 8px;
-    box-shadow: none;
-    transition: all 0.2s ease-in-out;
-    width: 300px;
-    height: auto;
-    text-align: left;
-    padding: 1%;
+.admin-navbar {
+    width: 100%;
+    padding: 18px 0 0;
+    background: transparent;
 }
-.card:hover {
-    box-shadow: 0 4px 8px var(--ink);
+
+.admin-nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
 }
-.card-container {
+
+.admin-navbar ul {
+    list-style: none;
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
-    justify-content: left;
-    margin-top: 20px;
-    padding-left: 2%;
-}
-.card-title {
-    color: var(--ink);
-    font-size: 22px;
-    font-weight: 900;
-    margin-bottom: 10px;   
-}
-.card-text {
-    font-size: 20px;
-    color: var(--muted);
-    font-weight: 700;
-}
-.container-admin h1{
-    padding: 2%;
-    text-align: left;
-}
-.container-admin h2{
-    padding-left: 2%;
-    text-align:left;
-    font-size: 18px;
-    padding-bottom: 3%
-}
-.container-admin h3,p{
-    padding-top: 1%;
-    padding-left: 2%;
-    text-align:left;
-}
-.container-admin h4{
-    padding-top: 1%;
-    padding-left: 2%;
-    text-align:left;
-    font-size: 26px;
-    font-weight: 900;
-}
-#admin-subtitle{
-    color: var(--muted);
+    gap: 12px;
+    margin: 0;
+    padding: 0;
 }
 
-/* ESTILO FORMULARIOS */
-.campo-formulario {
+.admin-navbar li {
+    display: inline-flex;
+}
+
+.admin-navbar a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 1.02rem;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.admin-navbar a:hover {
+    background: rgba(129, 80, 104, 0.08);
+    border-color: rgba(129, 80, 104, 0.2);
+}
+
+.admin-dashboard {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 26px 40px;
+}
+
+.admin-topbar {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 4px 0 12px;
+    text-transform: uppercase;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.admin-title {
+    font-size: clamp(2.8rem, 4vw, 4rem);
+    margin: 0;
+    line-height: 1.05;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.admin-subtitle {
+    font-size: 1.18rem;
+    color: var(--muted);
+    margin: 14px 0 26px;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.admin-section {
+    margin-top: 24px;
+}
+
+.admin-section h2 {
+    font-size: 2.2rem;
+    margin: 0 0 18px;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    gap: 18px;
+}
+
+.summary-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    min-height: 128px;
+    padding: 22px 18px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.summary-number {
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.summary-label {
+    font-size: 1.06rem;
+    color: var(--ink);
+    max-width: 140px;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.indicators h2 {
+    margin-top: 32px;
+}
+
+.section-note {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-family: "Segoe UI", sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.indicator-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 22px;
+}
+
+.indicator-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 18px 18px;
+    min-height: 170px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.indicator-label {
+    font-size: 1.05rem;
+    color: var(--muted);
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.indicator-value {
+    font-size: clamp(2.3rem, 3vw, 4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.indicator-card small {
+    font-size: 1rem;
+    color: var(--muted);
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.agenda-callout {
+    margin-top: 34px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+}
+
+.callout-text {
+    flex: 1;
+}
+
+.callout-text h3 {
+    margin: 0 0 8px;
+    font-size: 2rem;
+    line-height: 1.15;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.callout-text p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+.agenda-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    height: 58px;
+    padding: 0 22px;
+    background: var(--button);
+    color: #fff;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.02rem;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.agenda-button:hover {
+    background: var(--dark);
+    color: #fff;
+    text-decoration: none;
+}
+
+.agenda-page {
+    width: min(100% - 52px, 1280px);
+    margin: 0 auto;
+    padding: 18px 0 56px;
+    color: var(--ink);
+}
+
+.agenda-header {
     margin-bottom: 18px;
 }
 
-.campo-formulario label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--ink);
-    font-weight: bold;
+.agenda-eyebrow {
+    margin: 0 0 8px;
+    color: #a5798c;
+    font: 700 0.72rem/1.2 "Segoe UI", sans-serif;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }
 
-.form-control,
-.campo-formulario select,
-.campo-formulario input {
+.agenda-header h1 {
+    margin: 0 0 10px;
+    font-size: 1.8rem;
+    line-height: 1.2;
+}
+
+.agenda-header > p:last-child {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.98rem;
+}
+
+.agenda-page .panel {
+    margin: 0 0 18px;
+    padding: 17px 16px;
+    background: #fffafc;
+    border: 1px solid #ecdde3;
+    border-radius: 12px;
+    box-shadow: 0 7px 22px rgba(93, 55, 73, 0.035);
+}
+
+.agenda-form-panel h2,
+.filters-panel > h2 {
+    margin: 0 0 7px;
+    font: 700 1rem/1.3 "Segoe UI", sans-serif;
+}
+
+.agenda-form-panel > p,
+.schedule-panel > p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.agenda-form {
+    display: grid;
+    gap: 10px;
+}
+
+.agenda-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.agenda-form .field-group,
+.filter-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.agenda-form label,
+.filter-field label {
+    color: #624d56;
+    font: 500 0.82rem/1.3 "Segoe UI", sans-serif;
+}
+
+.agenda-form input,
+.agenda-form select,
+.filters-grid input,
+.filters-grid select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--muted);
-    border-radius: 8px;
-    background-color: white;
-    box-sizing: border-box;
+    min-width: 0;
+    height: 41px;
+    padding: 0 12px;
+    color: var(--ink);
+    background-color: #fffafc;
+    border: 1px solid #e6cdd8;
+    border-radius: 11px;
+    font: 0.88rem "Segoe UI", sans-serif;
 }
 
-.errorlist {
+.agenda-form input:focus,
+.agenda-form select:focus,
+.filters-grid input:focus,
+.filters-grid select:focus {
+    border-color: var(--button);
+    outline: 3px solid rgba(109, 70, 87, 0.12);
+}
+
+.agenda-form .single-row {
+    align-items: end;
+}
+
+.primary-btn,
+.filter-submit {
+    min-height: 41px;
+    padding: 0 16px;
+    color: #fff;
+    background: #80516a;
+    border: 1px solid #80516a;
+    border-radius: 8px;
+    font: 700 0.85rem "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.primary-btn:hover,
+.filter-submit:hover {
+    background: var(--dark);
+    border-color: var(--dark);
+}
+
+.agenda-form .errorlist {
+    margin: 0;
+    padding-left: 18px;
     color: var(--danger);
-    padding-left: 0;
-    list-style: none;
+    font: 0.8rem "Segoe UI", sans-serif;
+}
+
+.toggle-row {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 14px;
+}
+
+.toggle-tab {
+    min-height: 38px;
+    padding: 0 14px;
+    color: #80516a;
+    background: #f2e0e7;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font: 500 0.84rem "Segoe UI", sans-serif;
+    cursor: pointer;
+}
+
+.toggle-tab.active {
+    background: #fffafc;
+    border-color: #80516a;
+}
+
+.schedule-panel h3 {
+    margin: 0 0 5px;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.schedule-panel > p {
+    margin-bottom: 0;
+}
+
+.availability-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.availability-day h4 {
+    margin: 0 0 8px;
+    font: 700 0.9rem "Segoe UI", sans-serif;
+}
+
+.availability-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.availability-slots span {
+    padding: 7px 11px;
+    color: var(--dark);
+    background: #f5e8ed;
+    border: 1px solid #ecd5df;
+    border-radius: 8px;
+    font: 0.82rem "Segoe UI", sans-serif;
+}
+
+.no-slots {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+.filters-panel {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 4px 0 0 !important;
+}
+
+.filters-panel > h2 {
+    margin-bottom: 14px;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    align-items: end;
+}
+
+.filter-actions {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 14px;
+}
+
+.filter-actions a {
+    color: var(--button);
+    font: 0.85rem "Segoe UI", sans-serif;
+}
+
+.appointment-results {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.appointment-item,
+.filters-empty {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 15px 16px;
+    background: #fffafc;
+    border: 1px solid #ecdde3;
+    border-radius: 11px;
+}
+
+.appointment-item h3,
+.appointment-item p,
+.filters-empty p {
+    margin: 0;
+}
+
+.appointment-item h3 {
+    margin-bottom: 4px;
+    font: 700 0.95rem "Segoe UI", sans-serif;
+}
+
+.appointment-item p,
+.filters-empty p {
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+.appointment-status {
+    flex: 0 0 auto;
+    padding: 5px 10px;
+    color: var(--dark);
+    background: #f2e0e7;
+    border-radius: 999px;
+    font: 700 0.76rem "Segoe UI", sans-serif;
+}
+
+.agenda-messages {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    color: var(--dark);
+    background: #f2e0e7;
+    border-radius: 8px;
+}
+
+.agenda-messages p {
+    margin: 0;
+}
+
+@media (max-width: 1100px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+    }
+
+    .indicator-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .agenda-page {
+        width: min(100% - 32px, 1280px);
+        padding-top: 14px;
+    }
+
+    .admin-dashboard {
+        padding: 12px 16px 40px;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-callout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .agenda-button {
+        width: 100%;
+    }
+
+    .agenda-form .form-row,
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-form .single-row {
+        align-items: stretch;
+    }
+
+    .primary-btn {
+        width: 100%;
+    }
+
+    .filter-actions {
+        grid-column: auto;
+        flex-wrap: wrap;
+    }
+
+    .appointment-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }

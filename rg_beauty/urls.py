@@ -25,5 +25,6 @@ urlpatterns = [
     path('agendar_cita/', views.agendar_cita, name='agendar_cita'),
     path('ver_citas/', views.ver_citas, name='ver_citas'),
     path('vista_administracion/', views.vista_administracion, name='vista_administracion'),
+    path('agendar_cita_admin/', views.agendar_cita_admin, name='agendar_cita_admin'),
 
 ]
