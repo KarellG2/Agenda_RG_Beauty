@@ -4,15 +4,6 @@
     gap: 10px;
 }
 
-.service-item,
-.services-about {
-    padding: 17px;
-    background: #fffafc;
-    border: 1px solid #ecdde3;
-    border-radius: 11px;
-    box-shadow: 0 6px 18px rgba(93, 55, 73, 0.025);
-}
-
 .service-item h2 {
     margin: 0 0 8px;
     font: 700 0.9rem "Segoe UI", sans-serif;

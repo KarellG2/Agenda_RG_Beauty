@@ -6,16 +6,16 @@ from .models import Reserva
 # Create your views here.
 
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'home_cliente.html')
 
 def dashboard(request):
     return render(request, 'dashboard.html')
 
 def agendar_cita(request):
-    return render(request, 'agendar_cita.html')
+    return render(request, 'agendar_cita_cliente.html')
 
 def ver_citas(request):
-    return render(request, 'ver_citas.html')
+    return render(request, 'ver_citas_cliente.html')
 
 def agendar_cita(request):
     if request.method == 'POST':
@@ -25,7 +25,7 @@ def agendar_cita(request):
             return render(request, 'cita_agendada.html')  # REDIRIGE PAGINA CONFIRMACION
     else:
         form = ReservaForm()
-    return render(request, 'agendar_cita.html', {'form': form})
+    return render(request, 'agendar_cita_cliente.html', {'form': form})
 
 def vista_administracion(request):
     return render(request, 'dashboard_admin.html')

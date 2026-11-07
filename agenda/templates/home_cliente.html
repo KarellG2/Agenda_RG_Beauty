@@ -1,0 +1,31 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Inicio | RG Beauty{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'inicio-cliente.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cliente-page inicio-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Tu momento de bienestar</p>
+        <h1>Tu próxima cita</h1>
+        <p>Reserva tu próximo momento de cuidado personal en RG Beauty.</p>
+    </header>
+
+    <div class="inicio-cliente-grid">
+        <section class="cliente-panel cita-proxima" aria-labelledby="cita-proxima-title">
+            <h2 id="cita-proxima-title">Próximas citas</h2>
+            <p>Aún no tienes próximas citas. Tu momento de bienestar empieza aquí.</p>
+        </section>
+
+        <aside class="cliente-panel nueva-reserva" aria-labelledby="nueva-reserva-title">
+            <p class="cliente-eyebrow">Un momento para ti</p>
+            <h2 id="nueva-reserva-title">Agenda una cita</h2>
+            <p>Elige tu tratamiento y encuentra un horario que te acomode.</p>
+            <a href="{% url 'agendar_cita' %}" class="agenda-button">Agendar cita</a>
+        </aside>
+    </div>
+</div>
+{% endblock %}      

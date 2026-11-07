@@ -1,0 +1,241 @@
+@media (min-width: 760px) {
+  .app-shell:not(.admin-mode) {
+    padding: 28px;
+  }
+
+  .app-shell:not(.admin-mode) .workspace {
+    width: 100%;
+    max-width: 1240px;
+    min-height: calc(100 * min(var(--vh, 1vh), 1vh) - 56px);
+    margin: 0 auto;
+  }
+
+  .app-shell:not(.admin-mode) .workspace > header {
+    padding: 18px 48px;
+  }
+
+  .app-shell:not(.admin-mode) .client-content {
+    padding: 36px clamp(36px, 6vw, 82px) 52px;
+  }
+
+  .app-shell:not(.admin-mode) #storage-notice {
+    max-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .app-shell:not(.admin-mode) #login {
+    max-width: 760px;
+    margin: 28px auto;
+  }
+
+  .app-shell:not(.admin-mode) #client-login-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 20px;
+  }
+
+  .app-shell:not(.admin-mode) #client-login-form label[for="client-identity"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .app-shell:not(.admin-mode) #client-identity {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .app-shell:not(.admin-mode) #client-login-form label[for="client-token"] {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .app-shell:not(.admin-mode) #client-token {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .app-shell:not(.admin-mode) #client-login-form p,
+  .app-shell:not(.admin-mode) #client-login-form button {
+    grid-column: 1 / -1;
+  }
+
+  .app-shell:not(.admin-mode) #home:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+    align-content: start;
+    gap: 12px 32px;
+  }
+
+  .app-shell:not(.admin-mode) #home > p:first-child,
+  .app-shell:not(.admin-mode) #home-heading {
+    grid-column: 1 / -1;
+  }
+
+  .app-shell:not(.admin-mode) #home-card,
+  .app-shell:not(.admin-mode) #home-empty {
+    grid-column: 1;
+    align-self: start;
+  }
+
+  .app-shell:not(.admin-mode) #home-book {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+    margin-top: 0;
+  }
+
+  .app-shell:not(.admin-mode) #book {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    grid-template-areas:
+      "services date-label"
+      "services date-input"
+      "times name-label"
+      "times name-input"
+      "times phone-label"
+      "times phone-input"
+      "summary summary"
+      "submit submit";
+    align-items: start;
+    gap: 10px 32px;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form > fieldset:first-of-type {
+    grid-area: services;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form > label[for="appointment-date"] {
+    grid-area: date-label;
+  }
+
+  .app-shell:not(.admin-mode) #appointment-date {
+    grid-area: date-input;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form > fieldset:nth-of-type(2) {
+    grid-area: times;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form > label[for="booking-name"] {
+    grid-area: name-label;
+  }
+
+  .app-shell:not(.admin-mode) #booking-name {
+    grid-area: name-input;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form > label[for="booking-phone"] {
+    grid-area: phone-label;
+  }
+
+  .app-shell:not(.admin-mode) #booking-phone {
+    grid-area: phone-input;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form [data-template-id="booking-summary-card"] {
+    grid-area: summary;
+  }
+
+  .app-shell:not(.admin-mode) #submit-booking {
+    grid-area: submit;
+    width: min(100%, 440px);
+    justify-self: end;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form > fieldset,
+  .app-shell:not(.admin-mode) #booking-form > label,
+  .app-shell:not(.admin-mode) #booking-form > input {
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .app-shell:not(.admin-mode) #appointments:not([hidden]) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "eyebrow eyebrow"
+      "title title"
+      "description description"
+      "upcoming-title past-title"
+      "upcoming-list past-list"
+      "upcoming-empty past-empty";
+    align-content: start;
+    gap: 10px 28px;
+  }
+
+  .app-shell:not(.admin-mode) #appointments [data-template-id="appointments-eyebrow"] {
+    grid-area: eyebrow;
+  }
+
+  .app-shell:not(.admin-mode) #appointments-heading {
+    grid-area: title;
+    margin-bottom: 0;
+  }
+
+  .app-shell:not(.admin-mode) #appointments [data-template-id="client-demo-note"] {
+    grid-area: description;
+  }
+
+  .app-shell:not(.admin-mode) #appointments [data-template-id="upcoming-heading"] {
+    grid-area: upcoming-title;
+  }
+
+  .app-shell:not(.admin-mode) #upcoming-list {
+    grid-area: upcoming-list;
+  }
+
+  .app-shell:not(.admin-mode) #upcoming-empty {
+    grid-area: upcoming-empty;
+    align-self: start;
+  }
+
+  .app-shell:not(.admin-mode) #appointments [data-template-id="past-heading"] {
+    grid-area: past-title;
+  }
+
+  .app-shell:not(.admin-mode) #past-list {
+    grid-area: past-list;
+  }
+
+  .app-shell:not(.admin-mode) #past-empty {
+    grid-area: past-empty;
+    align-self: start;
+  }
+
+  .app-shell:not(.admin-mode) .bottom-nav {
+    position: sticky;
+    z-index: 5;
+    grid-template-columns: repeat(3, minmax(140px, 180px));
+    justify-content: center;
+    gap: 24px;
+    padding: 13px 24px;
+    border-radius: 0 0 22px 22px;
+  }
+
+  .app-shell:not(.admin-mode) .nav-item {
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 760px) and (max-width: 960px) {
+  .app-shell:not(.admin-mode) .client-content {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+
+  .app-shell:not(.admin-mode) #booking-form {
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 0.9fr);
+    gap: 10px 20px;
+  }
+}

@@ -1,0 +1,58 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Mis Citas | RG Beauty{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'mis-citas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cliente-page citas-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Tus momentos</p>
+        <h1>Mis citas</h1>
+        <p>Consulta aquí el resumen de tus reservas.</p>
+    </header>
+
+    <div class="citas-cliente-grid">
+        <section aria-labelledby="proximas-citas-title">
+            <h2 id="proximas-citas-title">Próximas citas</h2>
+            {% if citas %}
+                <div class="citas-table-wrap">
+                    <table class="citas-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Teléfono</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Servicio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas %}
+                                <tr>
+                                    <td>{{ cita.nombre }}</td>
+                                    <td>{{ cita.correo }}</td>
+                                    <td>{{ cita.telefono }}</td>
+                                    <td>{{ cita.fecha }}</td>
+                                    <td>{{ cita.hora }}</td>
+                                    <td>{{ cita.servicio }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="cliente-panel cita-empty-state">No tienes citas próximas.</div>
+            {% endif %}
+        </section>
+
+        <section aria-labelledby="anteriores-citas-title">
+            <h2 id="anteriores-citas-title">Anteriores y canceladas</h2>
+            <div class="cliente-panel cita-empty-state">Todavía no hay citas anteriores.</div>
+        </section>
+    </div>
+</div>
+{% endblock %}      

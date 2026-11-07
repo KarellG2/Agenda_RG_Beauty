@@ -28,6 +28,7 @@
 .filters-grid input,
 .filters-grid select,
 .admin-page-search,
+.admin-field,
 .campo-formulario input,
 .campo-formulario select,
 .campo-formulario textarea {
@@ -43,20 +44,10 @@
 }
 
 .admin-field {
-    width: 100%;
-    min-width: 0;
     min-height: 38px;
     padding: 0 10px;
-    border: 1px solid #e6cdd8;
     border-radius: 9px;
-    color: var(--ink);
-    background: #fffafc;
-    font: 0.8rem "Segoe UI", sans-serif;
-}
-
-.admin-field:focus {
-    border-color: var(--button);
-    outline: 3px solid color-mix(in srgb, var(--button) 14%, transparent);
+    font-size: 0.8rem;
 }
 
 .admin-textarea {
@@ -70,6 +61,7 @@
 .filters-grid input:focus,
 .filters-grid select:focus,
 .admin-page-search:focus,
+.admin-field:focus,
 .campo-formulario input:focus,
 .campo-formulario select:focus,
 .campo-formulario textarea:focus {

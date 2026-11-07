@@ -1,0 +1,50 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Agendar Cita | RG Beauty{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'agendar-cliente.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cliente-page agenda-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Un momento para ti</p>
+        <h1>Agenda tu cita</h1>
+        <p>Elige el tratamiento y el horario que mejor te acomoden.</p>
+    </header>
+
+    <section class="cliente-panel reserva-panel" aria-labelledby="reserva-title">
+        <h2 id="reserva-title">Detalles de tu reserva</h2>
+        <form class="reserva-form" method="post" action="{% url 'agendar_cita' %}">
+            {% csrf_token %}
+            <div class="campo-formulario">
+                {{ form.id_personal_servicio.label_tag }}
+                {{ form.id_personal_servicio }}
+                {{ form.id_personal_servicio.errors }}
+            </div>
+            <div class="campo-formulario">
+                {{ form.id_cliente.label_tag }}
+                {{ form.id_cliente }}
+                {{ form.id_cliente.errors }}
+            </div>
+            <div class="campo-formulario">
+                {{ form.id_personal.label_tag }}
+                {{ form.id_personal }}
+                {{ form.id_personal.errors }}
+            </div>
+            <div class="campo-formulario">
+                {{ form.fecha.label_tag }}
+                {{ form.fecha }}
+                {{ form.fecha.errors }}
+            </div>
+            <div class="campo-formulario">
+                {{ form.hora.label_tag }}
+                {{ form.hora }}
+                {{ form.hora.errors }}
+            </div>
+            <button type="submit" class="primary-btn">Confirmar reserva</button>
+        </form>
+    </section>
+</div>
+{% endblock %}      

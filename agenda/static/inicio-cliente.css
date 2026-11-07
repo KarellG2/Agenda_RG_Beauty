@@ -1,0 +1,38 @@
+.inicio-cliente-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+    align-items: start;
+    gap: 20px;
+}
+
+.cita-proxima {
+    min-height: 180px;
+}
+
+.nueva-reserva {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+}
+
+.nueva-reserva .cliente-eyebrow {
+    margin: 0;
+}
+
+.nueva-reserva h2 {
+    margin: 0;
+}
+
+.nueva-reserva .agenda-button {
+    margin-top: 8px;
+}
+
+@media (max-width: 700px) {
+    .cliente-panel {
+        padding: 18px;
+    }
+
+    .inicio-cliente-grid {
+        grid-template-columns: 1fr;
+    }
+}

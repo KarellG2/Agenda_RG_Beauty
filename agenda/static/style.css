@@ -54,23 +54,6 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
 }
 
-.icon {
-    width: 15%;
-}
-
-.header-buttons ul {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-}
-
-.header-buttons .nav-link {
-    white-space: nowrap;
-}
-
 .admin-dashboard {
     max-width: 1280px;
     margin: 0 auto;
