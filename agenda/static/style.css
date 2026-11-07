@@ -7,6 +7,9 @@
     --panel: #f4efef;
     --line: #d9c7cc;
     --button: #6d4657;
+    --button-hover: color-mix(in srgb, var(--button) 82%, #000000);
+    --button-soft: color-mix(in srgb, var(--button) 16%, #ffffff);
+    --button-text: #ffffff;
     --danger: #8b344a;
     --grey: #f5f0f1;
     --soft: #f2e8ea;
@@ -44,28 +47,6 @@ body, html {
     border: 0;
 }
 
-.toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 38px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    border: 1.5px solid var(--button);
-    background: #fffafc;
-    color: var(--ink);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 700;
-    transition: all 0.2s ease-in-out;
-}
-
-.toggle-btn:hover {
-    background: var(--button);
-    color: #fff;
-    text-decoration: none;
-}
-
 h1, h2, h3, h4, h5, h6 {
     color: var(--ink);
     margin-top: 0;
@@ -88,32 +69,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .header-buttons .nav-link {
     white-space: nowrap;
-}
-
-.btn-nav {
-    background-color: transparent;
-    color: var(--ink);
-    border: 1px solid var(--clay);
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 999px;
-    transition: all 0.2s ease-in-out;
-}
-
-.btn-nav:hover {
-    background-color: var(--clay);
-    color: var(--sage);
-}
-
-.btn-nav-admin {
-    background-color: transparent;
-    color: var(--ink);
-    border: transparent;
-    padding: 8px 16px;
-    font-size: 20px;
-    font-weight: 500;
-    border-radius: 999px;
 }
 
 .admin-navbar {
@@ -311,28 +266,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: "Georgia", "Times New Roman", serif;
 }
 
-.agenda-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 200px;
-    height: 58px;
-    padding: 0 22px;
-    background: var(--button);
-    color: #fff;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 1.02rem;
-    font-family: "Segoe UI", sans-serif;
-}
-
-.agenda-button:hover {
-    background: var(--dark);
-    color: #fff;
-    text-decoration: none;
-}
-
 .agenda-page {
     width: min(100% - 52px, 1280px);
     margin: 0 auto;
@@ -384,106 +317,6 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 0 14px;
     color: var(--muted);
     font-size: 0.88rem;
-}
-
-.agenda-form {
-    display: grid;
-    gap: 10px;
-}
-
-.agenda-form .form-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.agenda-form .field-group,
-.filter-field {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.agenda-form label,
-.filter-field label {
-    color: #624d56;
-    font: 500 0.82rem/1.3 "Segoe UI", sans-serif;
-}
-
-.agenda-form input,
-.agenda-form select,
-.filters-grid input,
-.filters-grid select {
-    width: 100%;
-    min-width: 0;
-    height: 41px;
-    padding: 0 12px;
-    color: var(--ink);
-    background-color: #fffafc;
-    border: 1px solid #e6cdd8;
-    border-radius: 11px;
-    font: 0.88rem "Segoe UI", sans-serif;
-}
-
-.agenda-form input:focus,
-.agenda-form select:focus,
-.filters-grid input:focus,
-.filters-grid select:focus {
-    border-color: var(--button);
-    outline: 3px solid rgba(109, 70, 87, 0.12);
-}
-
-.agenda-form .single-row {
-    align-items: end;
-}
-
-.primary-btn,
-.filter-submit {
-    min-height: 41px;
-    padding: 0 16px;
-    color: #fff;
-    background: #80516a;
-    border: 1px solid #80516a;
-    border-radius: 8px;
-    font: 700 0.85rem "Segoe UI", sans-serif;
-    cursor: pointer;
-    transition: background-color 0.18s ease, border-color 0.18s ease;
-}
-
-.primary-btn:hover,
-.filter-submit:hover {
-    background: var(--dark);
-    border-color: var(--dark);
-}
-
-.agenda-form .errorlist {
-    margin: 0;
-    padding-left: 18px;
-    color: var(--danger);
-    font: 0.8rem "Segoe UI", sans-serif;
-}
-
-.toggle-row {
-    display: flex;
-    gap: 6px;
-    margin: 0 0 14px;
-}
-
-.toggle-tab {
-    min-height: 38px;
-    padding: 0 14px;
-    color: #80516a;
-    background: #f2e0e7;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    font: 500 0.84rem "Segoe UI", sans-serif;
-    cursor: pointer;
-}
-
-.toggle-tab.active {
-    background: #fffafc;
-    border-color: #80516a;
 }
 
 .schedule-panel h3 {
@@ -539,25 +372,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 14px;
     font-size: 1.2rem;
     font-weight: 500;
-}
-
-.filters-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-    align-items: end;
-}
-
-.filter-actions {
-    display: flex;
-    grid-column: 1 / -1;
-    align-items: center;
-    gap: 14px;
-}
-
-.filter-actions a {
-    color: var(--button);
-    font: 0.85rem "Segoe UI", sans-serif;
 }
 
 .appointment-results {
@@ -643,28 +457,6 @@ h1, h2, h3, h4, h5, h6 {
     .agenda-callout {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .agenda-button {
-        width: 100%;
-    }
-
-    .agenda-form .form-row,
-    .filters-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .agenda-form .single-row {
-        align-items: stretch;
-    }
-
-    .primary-btn {
-        width: 100%;
-    }
-
-    .filter-actions {
-        grid-column: auto;
-        flex-wrap: wrap;
     }
 
     .appointment-item {

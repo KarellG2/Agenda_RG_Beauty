@@ -1,0 +1,132 @@
+.toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 18px;
+    border: 1.5px solid var(--button);
+    border-radius: 999px;
+    color: var(--ink);
+    background: #fffafc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.toggle-btn:hover {
+    color: var(--button-text);
+    background: var(--button);
+    text-decoration: none;
+}
+
+.btn-nav {
+    padding: 8px 16px;
+    border: 1px solid var(--button);
+    border-radius: 999px;
+    color: var(--ink);
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-nav .nav-link {
+    color: inherit;
+}
+
+.btn-nav:hover {
+    color: var(--button-text);
+    background: var(--button);
+}
+
+.btn-nav-admin {
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--ink);
+    background: transparent;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.agenda-button,
+.primary-btn,
+.filter-submit,
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 41px;
+    padding: 0 16px;
+    border: 1px solid var(--button);
+    border-radius: 8px;
+    color: var(--button-text);
+    background: var(--button);
+    font: 700 0.88rem "Segoe UI", sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.agenda-button {
+    min-width: 200px;
+    min-height: 58px;
+    padding: 0 22px;
+    border-radius: 12px;
+    font-size: 1.02rem;
+}
+
+.btn-primary {
+    --bs-btn-color: var(--button-text);
+    --bs-btn-bg: var(--button);
+    --bs-btn-border-color: var(--button);
+    --bs-btn-hover-color: var(--button-text);
+    --bs-btn-hover-bg: var(--button-hover);
+    --bs-btn-hover-border-color: var(--button-hover);
+    --bs-btn-active-bg: var(--button-hover);
+    --bs-btn-active-border-color: var(--button-hover);
+}
+
+.agenda-button:hover,
+.primary-btn:hover,
+.filter-submit:hover,
+.btn-primary:hover {
+    color: var(--button-text);
+    background: var(--button-hover);
+    border-color: var(--button-hover);
+    text-decoration: none;
+}
+
+.toggle-tab {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: var(--button);
+    background: var(--button-soft);
+    font: 500 0.84rem "Segoe UI", sans-serif;
+    cursor: pointer;
+}
+
+.toggle-tab.active {
+    background: #fffafc;
+    border-color: var(--button);
+}
+
+.toggle-btn:focus-visible,
+.btn-nav:focus-within,
+.agenda-button:focus-visible,
+.primary-btn:focus-visible,
+.filter-submit:focus-visible,
+.btn-primary:focus-visible,
+.toggle-tab:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--button) 25%, transparent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+    .agenda-button {
+        width: 100%;
+    }
+}
