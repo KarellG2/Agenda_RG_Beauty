@@ -3,20 +3,7 @@
 {% block title %}RG Beauty - Vista de la dueña{% endblock %}
 
 {% block topbar %}
-<nav class="admin-navbar" aria-label="Navegación del administrador">
-    <div class="admin-nav-container">
-        <a href="{% url 'home' %}" class="toggle-btn" aria-label="Cambiar a la vista de cliente">Vista cliente</a>
-        <ul>
-            <li><a href="{% url 'vista_administracion' %}">Dashboard</a></li>
-            <li><a href="{% url 'agendar_cita_admin' %}">Agenda</a></li>
-            <li><a href="#">Clientes</a></li>
-            <li><a href="#">Servicios</a></li>
-            <li><a href="#">Notificaciones</a></li>
-            <li><a href="#">Auditoría</a></li>
-            <li><a href="#">Configuración</a></li>
-        </ul>
-    </div>
-</nav>
+{% include "admin_navbar.html" with active_page="dashboard" %}
 {% endblock %}
 
 {% block content %}

@@ -1,0 +1,34 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Clientes | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'clientes.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="clientes" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page clients-page">
+    <div class="admin-demo-notice" role="note">
+        Modo de demostración: esta vista no se conecta ni guarda datos en la base de datos.
+    </div>
+
+    <section aria-labelledby="clients-title">
+        <h1 class="admin-section-title" id="clients-title">Clientes</h1>
+        <p class="admin-section-description">Ficha mínima derivada de las reservas: nombre y contacto. Las citas anteriores que no incluyan estos datos no se completan automáticamente.</p>
+
+        <form class="clients-search" role="search" method="get">
+            <label for="client-search">Buscar por nombre o contacto</label>
+            <input class="admin-page-search" id="client-search" name="q" type="search" value="{{ request.GET.q }}">
+        </form>
+
+        <div class="clients-empty-state" role="status">
+            <p>No hay clientes que coincidan con la búsqueda.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% load static %}
+
+<div class="admin-site-header">
+    <div class="admin-brand-row">
+        <a class="admin-brand" href="{% url 'vista_administracion' %}">
+            <img src="{% static 'assets/Icon.png' %}" alt="">
+            <span>RG Beauty</span>
+        </a>
+        <a href="{% url 'home' %}" class="toggle-btn" aria-label="Cambiar a la vista de cliente">Vista cliente</a>
+    </div>
+    <nav class="admin-navbar" aria-label="Navegación del administrador">
+        <div class="admin-nav-container">
+            <ul>
+                <li><a class="{% if active_page == 'dashboard' %}is-active{% endif %}" href="{% url 'vista_administracion' %}">Dashboard</a></li>
+                <li><a class="{% if active_page == 'agenda' %}is-active{% endif %}" href="{% url 'agendar_cita_admin' %}">Agenda</a></li>
+                <li><a class="{% if active_page == 'clientes' %}is-active{% endif %}" href="{% url 'clientes_admin' %}">Clientes</a></li>
+                <li><a class="{% if active_page == 'servicios' %}is-active{% endif %}" href="{% url 'servicios_admin' %}">Servicios</a></li>
+                <li><a href="#">Notificaciones</a></li>
+                <li><a href="#">Auditoría</a></li>
+                <li><a href="#">Configuración</a></li>
+            </ul>
+        </div>
+    </nav>
+</div>

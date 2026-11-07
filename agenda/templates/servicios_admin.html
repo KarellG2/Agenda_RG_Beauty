@@ -1,0 +1,49 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Servicios | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="servicios" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <div class="admin-demo-notice" role="note">
+        Modo de demostración: esta vista no se conecta ni guarda datos en la base de datos.
+    </div>
+
+    <section aria-labelledby="services-title">
+        <h1 class="admin-section-title" id="services-title">Servicios</h1>
+        <p class="admin-section-description">Catálogo básico de tratamientos. Precios de referencia en CLP; no se realizan ventas ni pagos aquí.</p>
+
+        <div class="services-grid">
+            <article class="service-item">
+                <h2>Tratamiento facial</h2>
+                <p>$35.000 CLP</p>
+            </article>
+            <article class="service-item">
+                <h2>Masaje relajante</h2>
+                <p>$42.000 CLP</p>
+            </article>
+            <article class="service-item">
+                <h2>Manicure</h2>
+                <p>$18.000 CLP</p>
+            </article>
+            <article class="service-item">
+                <h2>Diseño de cejas</h2>
+                <p>$15.000 CLP</p>
+            </article>
+        </div>
+
+        <aside class="services-about">
+            <h2>Sobre RG Beauty</h2>
+            <p>Un espacio dedicado al cuidado personal. Reserva tu momento de bienestar desde la agenda.</p>
+        </aside>
+    </section>
+</div>
+{% endblock %}

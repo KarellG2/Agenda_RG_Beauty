@@ -1,0 +1,96 @@
+.admin-site-header {
+    background: #fffafc;
+    border-bottom: 1px solid var(--line);
+}
+
+.admin-brand-row {
+    width: min(100% - 40px, 1280px);
+    min-height: 44px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ink);
+    text-decoration: none;
+    font: 700 1.1rem Georgia, "Times New Roman", serif;
+}
+
+.admin-brand img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.admin-brand:hover {
+    color: var(--ink);
+}
+
+.admin-navbar {
+    width: 100%;
+    padding: 0;
+    background: #fffafc;
+    border-top: 1px solid rgba(217, 199, 204, 0.6);
+}
+
+.admin-nav-container {
+    width: min(100% - 40px, 1280px);
+    margin: 0 auto;
+    padding: 0;
+}
+
+.admin-navbar ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 5px 0;
+    list-style: none;
+}
+
+.admin-navbar li {
+    display: inline-flex;
+}
+
+.admin-navbar a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+    font: 0.86rem "Segoe UI", sans-serif;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.admin-navbar a:hover,
+.admin-navbar a.is-active {
+    color: var(--muted);
+    background: var(--button-soft);
+    border-color: transparent;
+}
+
+@media (max-width: 640px) {
+    .admin-brand-row,
+    .admin-nav-container {
+        width: min(100% - 28px, 1280px);
+    }
+
+    .admin-navbar ul {
+        gap: 2px;
+    }
+
+    .admin-navbar a {
+        padding: 0 9px;
+        font-size: 0.8rem;
+    }
+}

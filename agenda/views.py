@@ -33,3 +33,11 @@ def vista_administracion(request):
 
 def agendar_cita_admin(request):
     return render(request, 'agendar_cita_admin.html')
+
+
+def clientes_admin(request):
+    return render(request, 'clientes_admin.html')
+
+
+def servicios_admin(request):
+    return render(request, 'servicios_admin.html')

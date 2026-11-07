@@ -1,0 +1,47 @@
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.service-item,
+.services-about {
+    padding: 17px;
+    background: #fffafc;
+    border: 1px solid #ecdde3;
+    border-radius: 11px;
+    box-shadow: 0 6px 18px rgba(93, 55, 73, 0.025);
+}
+
+.service-item h2 {
+    margin: 0 0 8px;
+    font: 700 0.9rem "Segoe UI", sans-serif;
+}
+
+.service-item p {
+    margin: 0;
+    color: var(--muted);
+    font: 0.82rem "Segoe UI", sans-serif;
+}
+
+.services-about {
+    margin-top: 18px;
+}
+
+.services-about h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.services-about p {
+    margin: 0;
+    color: var(--muted);
+    font: 0.88rem/1.5 "Segoe UI", sans-serif;
+}
+
+@media (max-width: 640px) {
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+}

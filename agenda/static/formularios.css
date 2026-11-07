@@ -27,6 +27,7 @@
 .agenda-form select,
 .filters-grid input,
 .filters-grid select,
+.admin-page-search,
 .campo-formulario input,
 .campo-formulario select,
 .campo-formulario textarea {
@@ -45,6 +46,7 @@
 .agenda-form select:focus,
 .filters-grid input:focus,
 .filters-grid select:focus,
+.admin-page-search:focus,
 .campo-formulario input:focus,
 .campo-formulario select:focus,
 .campo-formulario textarea:focus {
