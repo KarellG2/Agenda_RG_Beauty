@@ -10,17 +10,17 @@
 <div class="cliente-page inicio-cliente">
     <header class="cliente-page-heading">
         <p class="cliente-eyebrow">Tu momento de bienestar</p>
-        <h1>Tu próxima cita</h1>
+        <h1>Servicios Disponibles</h1>
         <p>Reserva tu próximo momento de cuidado personal en RG Beauty.</p>
     </header>
     <div class="inicio-cliente-grid">
         <section class="cliente-panel cita-proxima" aria-labelledby="cita-proxima-title">
             <h2 id="cita-proxima-title">Próximas citas</h2>
-            {% if citas %}
+            {% if servicio %}
             <ul class="cita-list">
-                {% for cita in citas %}
+                {% for servicio in servicios %}
                 <li class="cita-item">
-                    <h3>{{ cita.id_personal_servicio.id_servicio.nombre_s }}</h3>
+                    <h3>{{ servicio.servicio_s }}</h3>
                     <p>{{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora|time:"H:i" }}</p>
                     <p>Profesional: {{ cita.id_personal.nombre }}</p>
                 </li>

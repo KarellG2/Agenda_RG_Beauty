@@ -28,9 +28,9 @@
         </form>
         
         {% if clientes %}
-            <ul class="card-list">
+            <ul class="card-list" style="list-style: none;">
                 {% for cliente in clientes %}
-                <li class="card-list-item">
+                <li class="card-list-item" style="list-style: none;">
                     <div class="admin-card">
                         <h2 class="admin-card-title">{{ cliente.nombre_c }}</h2>
                         <p class="admin-card-description">Correo: {{ cliente.correo }}</p>
@@ -41,8 +41,8 @@
             {% endfor %}
         {% else %}
             <div class="admin-card admin-empty-state" role="status">
-            <p>No hay clientes que coincidan con la búsqueda.</p>
-        </div>
+                <p>No hay clientes que coincidan con la búsqueda.</p>
+            </div>
     </section>
 </div>
 {% endif %}

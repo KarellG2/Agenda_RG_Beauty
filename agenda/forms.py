@@ -1,5 +1,5 @@
 from django import forms
-from .models import Personal, Reserva, Cliente
+from .models import Reserva, ServicioPersonal
 
 
 # disponibiilidad horarios
@@ -17,35 +17,27 @@ HORARIOS_DISPONIBLES = [
 
 
 class ReservaForm(forms.ModelForm):
-    hora = forms.ChoiceField(
-        choices = HORARIOS_DISPONIBLES
-    )
+    hora = forms.ChoiceField(choices=HORARIOS_DISPONIBLES)
+    nombre_cliente = forms.CharField(max_length=100, label="Ingrese su Nombre")
+    telefono_cliente = forms.CharField(max_length=20, label="Ingrese su Teléfono")
+    correo_cliente = forms.EmailField(max_length=100, label="Ingrese su Correo Electrónico")
+
     class Meta:
         model = Reserva
         fields = [
             'id_personal_servicio',
-            'id_cliente',
-            'id_personal',
             'fecha',
             'hora',
         ]
-        
+
         labels = {
-            'id_personal_servicio': 'Elija un servicio',
-            'id_cliente': 'Ingrese su nombre',
-            'id_personal': 'Eliga un Profesional',
+            'id_personal_servicio': 'Elija un servicio y profesional',
             'fecha': 'Fecha',
             'hora': 'Hora',
         }
-        
+
         widgets = {
             'id_personal_servicio': forms.Select(attrs={
-                'class': 'form-control',
-            }),
-            'id_cliente': forms.Select(attrs={
-                'class': 'form-control',
-            }),
-            'id_personal': forms.Select(attrs={
                 'class': 'form-control',
             }),
             'fecha': forms.DateInput(attrs={
@@ -57,11 +49,24 @@ class ReservaForm(forms.ModelForm):
                 'class': 'form-control',
             }),
         }
-                
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['id_personal_servicio'].queryset = (
+            ServicioPersonal.objects.select_related('id_servicio', 'id_personal')
+        )
+
 class AutenticacionForm(forms.Form):
     nombre = forms.CharField(max_length=100, label='Ingrese su Nombre')
     password = forms.CharField(
         widget=forms.PasswordInput(),
         label='Ingrese su Contraseña',
+    )
+
+
+class AutenticacionClienteForm(AutenticacionForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(),
+        label='Ingrese su Teléfono',
     )
     

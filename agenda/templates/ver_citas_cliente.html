@@ -15,11 +15,19 @@
     </header>
 
     <div class="citas-cliente-grid">
+
         <section aria-labelledby="proximas-citas-title">
-            <h2 id="proximas-citas-title">Próximas citas</h2>
+
+            <h2 id="proximas-citas-title">
+                Próximas citas
+            </h2>
+
             {% if citas %}
+
                 <div class="citas-table-wrap">
+
                     <table class="citas-table">
+
                         <thead>
                             <tr>
                                 <th>Nombre</th>
@@ -28,24 +36,66 @@
                                 <th>Fecha</th>
                                 <th>Hora</th>
                                 <th>Servicio</th>
+                                <th>Estado</th>
                             </tr>
                         </thead>
+
                         <tbody>
+
                             {% for cita in citas %}
+
                                 <tr>
-                                    <td>{{ cita.nombre }}</td>
-                                    <td>{{ cita.correo }}</td>
-                                    <td>{{ cita.telefono }}</td>
-                                    <td>{{ cita.fecha }}</td>
-                                    <td>{{ cita.hora }}</td>
-                                    <td>{{ cita.servicio }}</td>
+                                    <td>
+                                        {{ cita.id_cliente.nombre_c }}
+                                    </td>
+
+                                    <td>
+                                        {{ cita.id_cliente.correo }}
+                                    </td>
+
+                                    <td>
+                                        {{ cita.id_cliente.telefono }}
+                                    </td>
+
+                                    <td>
+                                        {{ cita.fecha|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+                                        {{ cita.hora|time:"H:i" }}
+                                    </td>
+
+                                    <td>
+                                        {{ cita.id_personal_servicio.id_servicio.nombre_s }}
+                                    </td>
+
+                                    <td>
+                                        <span class="estado-cita estado-{{ cita.estado }}">
+                                            {{ cita.get_estado_display }}
+                                        </span>
+                                    </td>
                                 </tr>
+
                             {% endfor %}
+
                         </tbody>
+
                     </table>
+
                 </div>
+
             {% else %}
-                <div class="cliente-panel cita-empty-state">No tienes citas próximas.</div>
+
+                <div class="cliente-panel cita-empty-state">
+                    <h3>Aún no tienes citas.</h3>
+                    <p>Agenda tu próximo momento de bienestar.</p>
+
+                    <a href="{% url 'agendar_cita' %}"
+                       class="btn btn-primary">
+                        Agendar cita
+                    </a>
+                </div>
+
             {% endif %}
         </section>
 

@@ -23,7 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('agendar_cita/', views.agendar_cita, name='agendar_cita'),
-    path('ver_citas/', views.ver_citas, name='ver_citas'),
+    path('ver_citas_cliente/', views.ver_citas_cliente, name='ver_citas_cliente'),
     path('vista_administracion/', views.vista_administracion, name='vista_administracion'),
     path('agendar_cita_admin/', views.agendar_cita_admin, name='agendar_cita_admin'),
     path('clientes_admin/', views.clientes_admin, name='clientes_admin'),
@@ -34,5 +34,6 @@ urlpatterns = [
     path('acceso_denegado/', views.acceso_denegado, name='acceso_denegado'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('login_cliente/', views.login_cliente, name='login_cliente')
 
 ]

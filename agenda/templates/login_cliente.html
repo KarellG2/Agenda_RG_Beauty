@@ -1,0 +1,17 @@
+<!-- Formulario de login para clientes -->
+
+{% extends 'base_template.html' %}
+
+{% block title %}Iniciar Sesión | RG Beauty{% endblock %}
+
+{% block content %}
+
+<h1>Iniciar Sesión</h1>
+<form method="post" action="{% url 'login_cliente' %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {{ form.as_p }}
+    <button type="submit">Iniciar sesión</button>
+</form>
+
+{% endblock %}
