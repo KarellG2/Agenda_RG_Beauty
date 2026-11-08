@@ -26,15 +26,18 @@
                     <a class="navbar-brand align-items-center" href="{% url 'home' %}"> 
                         <img src="{% static 'assets/Icon.png' %}" alt="Logo de RG Beauty" class="icon"> <!-- Logo de RG Beauty -->
                     </a>
-                    <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Vista admin</a>
-                    
-                    <form method="post"
-                        action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="toggle-btn" aria-label="Cerrar sesión de administrador">
-                            Cerrar sesión
-                        </button>
-                    </form>
+
+                    {% if user.is_authenticated and user.is_staff %}
+                        <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Vista admin</a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="toggle-btn" aria-label="Cerrar sesión de administrador">
+                                Cerrar sesión
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="toggle-btn" aria-label="Iniciar sesión como administrador">Iniciar sesión</a>
+                    {% endif %}
 
                     <div class="header-buttons">
                         <ul>
@@ -50,8 +53,15 @@
         </header>
 
         <main>
-    {% block content %}
-    {% endblock %}
+            {% if messages %}
+                <div class="agenda-messages" role="status" aria-live="polite">
+                    {% for message in messages %}
+                        <p class="{{ message.tags }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}
+            {% endblock %}
         </main>
     </div>
 

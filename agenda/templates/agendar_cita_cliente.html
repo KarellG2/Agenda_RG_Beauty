@@ -43,6 +43,18 @@
                 {{ form.hora }}
                 {{ form.hora.errors }}
             </div>
+            <div class="campo-formulario">
+                {{ form.etiquetas.label_tag }}
+                <div class="tag-list">
+                    {{ form.etiquetas }}
+                </div>
+                {{ form.etiquetas.errors }}
+            </div>
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
             <button type="submit" class="primary-btn">Confirmar reserva</button>
         </form>
     </section>

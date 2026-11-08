@@ -53,18 +53,54 @@ class Personal(models.Model):
         return self.nombre
 
 
+# TABLA CATEGORIA_SERVICIO
+
+class CategoriaServicio(models.Model):
+    id_categoria = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'categoria_servicio'
+
+    def __str__(self):
+        return self.nombre
+
+
 # TABLA SERVICIO
 
 class Servicio(models.Model):
     id_servicio = models.AutoField(primary_key=True)
     nombre_s = models.CharField(max_length=100)
     descripcion = models.TextField()
+    categoria = models.ForeignKey(
+        CategoriaServicio,
+        on_delete=models.PROTECT,
+        db_column='id_categoria',
+        related_name='servicios',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = 'servicio'
 
     def __str__(self):
         return self.nombre_s
+
+
+# TABLA ETIQUETA
+
+class Etiqueta(models.Model):
+    id_etiqueta = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=50, unique=True)
+    color = models.CharField(max_length=20, default='#d9c7cc')
+
+    class Meta:
+        db_table = 'etiqueta'
+
+    def __str__(self):
+        return self.nombre
 
 
 # TABLA SERVICIO_PERSONAL
@@ -158,6 +194,11 @@ class Reserva(models.Model):
         null=True,
         blank=True,
         related_name='reserva'
+    )
+    etiquetas = models.ManyToManyField(
+        Etiqueta,
+        related_name='reservas',
+        blank=True,
     )
 
     class Meta:
