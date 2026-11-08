@@ -1,7 +1,7 @@
 from datetime import date
 
 from django import forms
-from .models import Personal, Reserva, Cliente, Etiqueta
+from .models import Personal, Reserva, Cliente, Etiqueta, Servicio
 
 
 # disponibiilidad horarios
@@ -14,6 +14,25 @@ HORARIOS_DISPONIBLES = [
     ('15:00', '15:00 - 16:00'),
     ('16:00', '16:00 - 17:00'),
 ]
+
+
+class ServicioForm(forms.ModelForm):
+    class Meta:
+        model = Servicio
+        fields = ['nombre_s', 'descripcion', 'categoria']
+        labels = {
+            'nombre_s': 'Nombre del servicio',
+            'descripcion': 'Descripción',
+            'categoria': 'Categoría',
+        }
+        widgets = {
+            'nombre_s': forms.TextInput(attrs={'class': 'admin-field'}),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'admin-field admin-textarea',
+                'rows': 4,
+            }),
+            'categoria': forms.Select(attrs={'class': 'admin-field'}),
+        }
 
 
 class ReservaForm(forms.ModelForm):

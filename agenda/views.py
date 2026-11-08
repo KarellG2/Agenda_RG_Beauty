@@ -1,9 +1,11 @@
-﻿from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import *
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Q
+from django.db.models import Max, Min, Q
+from django.db.models.deletion import ProtectedError
+from django.views.decorators.http import require_POST
 from .models import *
 
 
@@ -63,7 +65,65 @@ def clientes_admin(request):
 
 @user_passes_test(es_staff, login_url='login')
 def servicios_admin(request):
-    return render(request, 'servicios_admin.html')
+    servicios = Servicio.objects.annotate(
+        precio_minimo=Min('personal_asignado__precio'),
+        precio_maximo=Max('personal_asignado__precio'),
+    ).select_related('categoria').order_by('nombre_s')
+    return render(request, 'servicios_admin.html', {'servicios': servicios})
+
+
+@user_passes_test(es_staff, login_url='login')
+def servicio_crear(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Servicio creado correctamente.')
+            return redirect('servicios_admin')
+    else:
+        form = ServicioForm()
+
+    return render(request, 'servicio_admin.html', {
+        'form': form,
+        'titulo': 'Agregar servicio',
+        'texto_boton': 'Crear servicio',
+    })
+
+
+@user_passes_test(es_staff, login_url='login')
+def servicio_editar(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+    if request.method == 'POST':
+        form = ServicioForm(request.POST, instance=servicio)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Servicio actualizado correctamente.')
+            return redirect('servicios_admin')
+    else:
+        form = ServicioForm(instance=servicio)
+
+    return render(request, 'servicio_admin.html', {
+        'form': form,
+        'servicio': servicio,
+        'titulo': 'Editar servicio',
+        'texto_boton': 'Guardar cambios',
+    })
+
+
+@user_passes_test(es_staff, login_url='login')
+@require_POST
+def servicio_eliminar(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+    try:
+        servicio.delete()
+    except ProtectedError:
+        messages.error(
+            request,
+            'No se puede eliminar este servicio porque está asignado a profesionales o tiene reservas asociadas.',
+        )
+    else:
+        messages.success(request, 'Servicio eliminado correctamente.')
+    return redirect('servicios_admin')
 
 
 @user_passes_test(es_staff, login_url='login')
