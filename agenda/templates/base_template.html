@@ -26,23 +26,8 @@
                     <a class="navbar-brand align-items-center" href="{% url 'home' %}"> 
                         <img src="{% static 'assets/Icon.png' %}" alt="Logo de RG Beauty" class="icon"> <!-- Logo de RG Beauty -->
                     </a>
-<<<<<<< HEAD
                     <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Login Administración</a>
                     
-=======
-
-                    {% if user.is_authenticated and user.is_staff %}
-                        <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Vista admin</a>
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="toggle-btn" aria-label="Cerrar sesión de administrador">
-                                Cerrar sesión
-                            </button>
-                        </form>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="toggle-btn" aria-label="Iniciar sesión como administrador">Iniciar sesión</a>
-                    {% endif %}
->>>>>>> 5e8b77262c1d3e549eda0a03f3d9cee82d212379
 
                     <div class="header-buttons">
                         <ul>
