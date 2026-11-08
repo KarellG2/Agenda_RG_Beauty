@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('id_personal', models.AutoField(primary_key=True, serialize=False)),
                 ('nombre', models.CharField(max_length=100)),
                 ('credenciales', models.CharField(max_length=255)),
-                ('anios_experiencia', models.PositiveIntegerField()),
+                ('años_experiencia', models.PositiveIntegerField()),
             ],
             options={
                 'db_table': 'personal',

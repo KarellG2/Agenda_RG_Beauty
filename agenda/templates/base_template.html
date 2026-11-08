@@ -27,6 +27,15 @@
                         <img src="{% static 'assets/Icon.png' %}" alt="Logo de RG Beauty" class="icon"> <!-- Logo de RG Beauty -->
                     </a>
                     <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Vista admin</a>
+                    
+                    <form method="post"
+                        action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="toggle-btn" aria-label="Cerrar sesión de administrador">
+                            Cerrar sesión
+                        </button>
+                    </form>
+
                     <div class="header-buttons">
                         <ul>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>

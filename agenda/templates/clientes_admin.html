@@ -13,22 +13,37 @@
 
 {% block content %}
 <div class="admin-section-page clients-page">
-    <div class="admin-demo-notice" role="note">
+    <!-- <div class="admin-demo-notice" role="note">
         Modo de demostración: esta vista no se conecta ni guarda datos en la base de datos.
-    </div>
+    </div> -->
 
     <section aria-labelledby="clients-title">
         <h1 class="admin-section-title" id="clients-title">Clientes</h1>
-        <p class="admin-section-description">Ficha mínima derivada de las reservas: nombre y contacto. Las citas anteriores que no incluyan estos datos no se completan automáticamente.</p>
+        <!-- <p class="admin-section-description">Ficha mínima derivada de las reservas: nombre y contacto. Las citas anteriores que no incluyan estos datos no se completan automáticamente.</p> -->
 
         <form class="clients-search" role="search" method="get">
             <label for="client-search">Buscar por nombre o contacto</label>
             <input class="admin-page-search" id="client-search" name="q" type="search" value="{{ request.GET.q }}">
+            <button class="btn btn-nav" type="submit">Buscar</button>
         </form>
-
-        <div class="admin-card admin-empty-state" role="status">
+        
+        {% if clientes %}
+            <ul class="card-list">
+                {% for cliente in clientes %}
+                <li class="card-list-item">
+                    <div class="admin-card">
+                        <h2 class="admin-card-title">{{ cliente.nombre_c }}</h2>
+                        <p class="admin-card-description">Correo: {{ cliente.correo }}</p>
+                        <p class="admin-card-description">Teléfono: {{ cliente.telefono }}</p>
+                    </div>
+                </li>
+            </ul>
+            {% endfor %}
+        {% else %}
+            <div class="admin-card admin-empty-state" role="status">
             <p>No hay clientes que coincidan con la búsqueda.</p>
         </div>
     </section>
 </div>
+{% endif %}
 {% endblock %}

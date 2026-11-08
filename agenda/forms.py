@@ -1,7 +1,25 @@
 from django import forms
-from .models import Reserva, Cliente
+from .models import Personal, Reserva, Cliente
+
+
+# disponibiilidad horarios
+HORARIOS_DISPONIBLES = [
+    ('09:00', '10:00'),
+    ('10:00', '11:00'),
+    ('11:00', '12:00'),
+    ('12:00', '13:00'),
+#   ('13:00', '14:00'), <- hora de almuerzo
+    ('14:00', '15:00'),
+    ('15:00', '16:00'),
+    ('16:00', '17:00'),
+]
+
+
 
 class ReservaForm(forms.ModelForm):
+    hora = forms.ChoiceField(
+        choices = HORARIOS_DISPONIBLES
+    )
     class Meta:
         model = Reserva
         fields = [
@@ -41,12 +59,9 @@ class ReservaForm(forms.ModelForm):
         }
                 
 class AutenticacionForm(forms.Form):
-    model = Cliente
-    fields = [
-        'nombre_c',
-        'token',
-    ]
-    labels= {
-        'nombre_c': 'Ingrese su Nombre',
-        'token': 'Ingrese su Token de Acceso',
-    }
+    nombre = forms.CharField(max_length=100, label='Ingrese su Nombre')
+    password = forms.CharField(
+        widget=forms.PasswordInput(),
+        label='Ingrese su Contraseña',
+    )
+    

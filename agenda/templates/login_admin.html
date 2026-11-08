@@ -1,0 +1,17 @@
+<!-- Formulario de login para administradores -->
+
+{% extends 'base_template.html' %}
+
+{% block title %}Login Administrador | RG Beauty{% endblock %}
+
+{% block content %}
+
+<h1>Login Administrador</h1>
+<form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {{ form.as_p }}
+    <button type="submit">Iniciar sesión</button>
+</form>
+
+{% endblock %}

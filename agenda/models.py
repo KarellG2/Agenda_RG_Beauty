@@ -37,7 +37,7 @@ class Personal(models.Model):
     id_personal = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     credenciales = models.CharField(max_length=255)
-    anios_experiencia = models.PositiveIntegerField()
+    años_experiencia = models.PositiveIntegerField()
 
     id_rol = models.ForeignKey(
         Rol,

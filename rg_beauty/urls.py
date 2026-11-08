@@ -31,5 +31,8 @@ urlpatterns = [
     path('notificaciones_admin/', views.notificaciones_admin, name='notificaciones_admin'),
     path('auditoria_admin/', views.auditoria_admin, name='auditoria_admin'),
     path('configuracion_admin/', views.configuracion_admin, name='configuracion_admin'),
+    path('acceso_denegado/', views.acceso_denegado, name='acceso_denegado'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
 
 ]
