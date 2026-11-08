@@ -1,11 +1,15 @@
 {% extends "base_template.html" %}
 
 {% block title %}RG Beauty - Vista de la dueña{% endblock %}
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="dashboard" %}
+{% endblock %}
 {% block content %}
 <div class="admin-dashboard">
-    <div class="admin-topbar">RG BEAUTY · VISTA DE LA DUEÑA</div>
-
-    <h1 class="admin-title">Panel de administración</h1>
+    <header class="agenda-header">
+        <p class="agenda-eyebrow">Panel de administración</p>
+        <h1>Dashboard</h1>
+    </header>
     <p class="admin-subtitle">Una visión clara de la agenda y del estado de las reservas.</p>
 
     <section class="admin-section">
@@ -60,7 +64,7 @@
             <h3>Una agenda, una sola fuente de información</h3>
             <p>Consulta horarios y gestiona los cambios de citas en un mismo lugar.</p>
         </div>
-        <a href="{% url 'agendar_cita_admin' %}" class="agenda-button">Ir a la agenda</a>
+        <a href="{% url 'agendar_cita_admin' %}" class="agenda-button">Volver al panel de administración</a>
     </section>
 </div>
 {% endblock %}

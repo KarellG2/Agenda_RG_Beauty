@@ -2,6 +2,11 @@
 {% load static %}
 
 {% block title %}Inicio | RG Beauty{% endblock %}
+{% block topbar %}
+{% if user.is_staff %}
+    {% include "admin_navbar.html" %}
+{% endif %}
+{% endblock %}
 {% block page_styles %}
 <link rel="stylesheet" href="{% static 'inicio-cliente.css' %}">
 {% endblock %}
@@ -10,19 +15,25 @@
 <div class="cliente-page inicio-cliente">
     <header class="cliente-page-heading">
         <p class="cliente-eyebrow">Tu momento de bienestar</p>
-        <h1>Servicios Disponibles</h1>
-        <p>Reserva tu próximo momento de cuidado personal en RG Beauty.</p>
+        {% if landing_cliente %}
+            <h1>Hola, {{ cliente.nombre_c }}</h1>
+            <p>Bienvenida a tu espacio RG Beauty. Aquí puedes revisar tus próximas citas y reservar tu próximo momento de cuidado.</p>
+        {% else %}
+            <h1>Servicios Disponibles</h1>
+            <p>Reserva tu próximo momento de cuidado personal en RG Beauty.</p>
+        {% endif %}
     </header>
     <div class="inicio-cliente-grid">
         <section class="cliente-panel cita-proxima" aria-labelledby="cita-proxima-title">
             <h2 id="cita-proxima-title">Próximas citas</h2>
-            {% if servicio %}
+            {% if citas %}
             <ul class="cita-list">
-                {% for servicio in servicios %}
+                {% for cita in citas %}
                 <li class="cita-item">
-                    <h3>{{ servicio.servicio_s }}</h3>
+                    <h3>{{ cita.id_personal_servicio.id_servicio.nombre_s }}</h3>
                     <p>{{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora|time:"H:i" }}</p>
                     <p>Profesional: {{ cita.id_personal.nombre }}</p>
+                    <p>Estado: {{ cita.get_estado_display }}</p>
                 </li>
                 {% endfor %}
             </ul>
@@ -37,6 +48,9 @@
             <h2 id="nueva-reserva-title">Agenda una cita</h2>
             <p>Elige tu tratamiento y encuentra un horario que te acomode.</p>
             <a href="{% url 'agendar_cita' %}" class="agenda-button">Agendar cita</a>
+            {% if not user.is_authenticated %}
+            <p class="account-prompt">¿Aún no tienes cuenta? <a href="{% url 'registro_cliente' %}">Crear cuenta</a></p>
+            {% endif %}
         </aside>
     </div>
 </div>

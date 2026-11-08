@@ -6,7 +6,10 @@
             <img src="{% static 'assets/Icon.png' %}" alt="">
             <span>RG Beauty</span>
         </a>
-        <a href="{% url 'home' %}" class="toggle-btn" aria-label="Cambiar a la vista de cliente">Vista cliente</a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="toggle-btn">Cerrar sesión</button>
+        </form>
     </div>
     <nav class="admin-navbar" aria-label="Navegación del administrador">
         <div class="admin-nav-container">

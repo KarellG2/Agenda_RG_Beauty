@@ -1,4 +1,5 @@
 
+from django.conf import settings
 from django.db import models
 
 
@@ -9,6 +10,13 @@ class Cliente(models.Model):
     nombre_c = models.CharField(max_length=100)
     telefono = models.CharField(max_length=20)
     correo = models.EmailField(max_length=150)
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cliente',
+    )
 
     class Meta:
         db_table = 'cliente'

@@ -1,0 +1,196 @@
+.auth-page {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    padding: 48px 20px;
+    background: #ead8df;
+}
+
+.auth-card {
+    width: min(100%, 560px);
+    padding: clamp(26px, 6vw, 46px);
+    color: #fffafc;
+    background: linear-gradient(145deg, #704657 0%, #85566b 56%, #9a6a7d 100%);
+    border: 1px solid rgba(255, 250, 252, 0.48);
+    border-radius: 30px;
+    box-shadow: 0 24px 60px rgba(66, 45, 54, 0.2);
+}
+
+.auth-brand {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 20px;
+    place-items: center;
+    overflow: hidden;
+    background: #fffafc;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 50%;
+}
+
+.auth-brand:focus-visible {
+    outline: 3px solid rgba(255, 250, 252, 0.6);
+    outline-offset: 4px;
+}
+
+.auth-brand img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.auth-heading {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.auth-heading .cliente-eyebrow {
+    margin-bottom: 8px;
+    color: #f0d7e0;
+}
+
+.auth-heading h1 {
+    margin: 0 0 8px;
+    color: #fffafc;
+    font-size: clamp(1.9rem, 5vw, 2.45rem);
+    line-height: 1.12;
+}
+
+.auth-heading > p:last-child {
+    margin: 0;
+    color: #f5e8ed;
+    font: 0.94rem/1.5 "Segoe UI", sans-serif;
+}
+
+.auth-role-list {
+    display: grid;
+    gap: 14px;
+}
+
+.auth-role {
+    padding: 18px;
+    background: rgba(255, 250, 252, 0.1);
+    border: 1px solid rgba(255, 250, 252, 0.28);
+    border-radius: 18px;
+}
+
+.auth-role h2 {
+    margin: 0 0 6px;
+    color: #fffafc;
+    font: 700 1.16rem/1.3 Georgia, "Times New Roman", serif;
+}
+
+.auth-role p {
+    margin: 0 0 14px;
+    color: #f5e8ed;
+    font: 0.86rem/1.5 "Segoe UI", sans-serif;
+}
+
+.auth-role .agenda-button,
+.auth-submit {
+    width: 100%;
+    min-height: 48px;
+    color: #5d3749;
+    background: #fffafc;
+    border: 1px solid #f4e3e9;
+    border-radius: 14px;
+    font: 700 0.94rem "Segoe UI", sans-serif;
+    text-decoration: none;
+    transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.auth-role .agenda-button:hover,
+.auth-submit:hover {
+    color: #422d36;
+    background: #f4e3e9;
+    transform: translateY(-1px);
+}
+
+.auth-form {
+    display: grid;
+    gap: 16px;
+}
+
+.auth-field {
+    display: grid;
+    gap: 7px;
+}
+
+.auth-field label {
+    color: #fffafc;
+    font: 600 0.85rem "Segoe UI", sans-serif;
+}
+
+.auth-field input {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 15px;
+    color: #422d36;
+    background: rgba(255, 250, 252, 0.96);
+    border: 1px solid rgba(255, 250, 252, 0.65);
+    border-radius: 14px;
+    font: 0.92rem "Segoe UI", sans-serif;
+}
+
+.auth-field input::placeholder {
+    color: #8d727d;
+}
+
+.auth-field input:focus {
+    border-color: #fff;
+    outline: 3px solid rgba(255, 250, 252, 0.25);
+}
+
+.auth-errors,
+.auth-field .errorlist {
+    margin: 0;
+    padding-left: 18px;
+    color: #ffe0e8;
+    font: 0.8rem/1.45 "Segoe UI", sans-serif;
+}
+
+.auth-submit {
+    margin-top: 4px;
+    cursor: pointer;
+}
+
+.auth-footer {
+    margin: 22px 0 0;
+    color: #f5e8ed;
+    font: 0.85rem/1.5 "Segoe UI", sans-serif;
+    text-align: center;
+}
+
+.auth-footer a {
+    color: #fffafc;
+    font-weight: 700;
+    text-underline-offset: 3px;
+}
+
+.auth-back {
+    display: inline-block;
+    margin-top: 18px;
+    color: #fffafc;
+    font: 0.84rem "Segoe UI", sans-serif;
+    text-underline-offset: 3px;
+}
+
+.auth-page .agenda-messages {
+    width: min(100%, 560px);
+    margin: 0 0 16px;
+}
+
+@media (max-width: 600px) {
+    .auth-page {
+        min-height: 100vh;
+        padding: 28px 14px;
+    }
+
+    .auth-card {
+        border-radius: 24px;
+    }
+
+    .auth-role {
+        padding: 15px;
+    }
+}

@@ -35,15 +35,18 @@
                         <h2 class="admin-card-title">{{ cliente.nombre_c }}</h2>
                         <p class="admin-card-description">Correo: {{ cliente.correo }}</p>
                         <p class="admin-card-description">Teléfono: {{ cliente.telefono }}</p>
+                        <p class="admin-card-description">
+                            {% if cliente.usuario_id %}Cuenta registrada{% else %}Sin cuenta de acceso{% endif %}
+                        </p>
                     </div>
                 </li>
+                {% endfor %}
             </ul>
-            {% endfor %}
         {% else %}
             <div class="admin-card admin-empty-state" role="status">
                 <p>No hay clientes que coincidan con la búsqueda.</p>
             </div>
+        {% endif %}
     </section>
 </div>
-{% endif %}
 {% endblock %}

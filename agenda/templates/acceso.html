@@ -1,0 +1,41 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Iniciar sesión | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'acceso.css' %}">
+{% endblock %}
+
+{% block topbar %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <section class="auth-card" aria-labelledby="access-title">
+        <a class="auth-brand" href="{% url 'home' %}" aria-label="Volver al inicio">
+            <img src="{% static 'assets/Icon.png' %}" alt="RG Beauty">
+        </a>
+        <header class="auth-heading">
+            <p class="cliente-eyebrow">Tu espacio RG Beauty</p>
+            <h1 id="access-title">Bienvenida</h1>
+            <p>Elige cómo quieres acceder a tu cuenta.</p>
+        </header>
+
+        <div class="auth-role-list">
+            <article class="auth-role">
+                <h2>¿Eres administrador?</h2>
+                <p>Accede a la agenda y a las herramientas de gestión.</p>
+                <a class="agenda-button" href="{% url 'login' %}">Inicia sesión aquí</a>
+            </article>
+
+            <article class="auth-role">
+                <h2>¿Eres cliente?</h2>
+                <p>Ingresa con tu correo y contraseña para consultar tus reservas.</p>
+                <a class="agenda-button" href="{% url 'login_cliente' %}">Inicia sesión aquí</a>
+            </article>
+        </div>
+
+        <p class="auth-footer">¿Aún no tienes cuenta? <a href="{% url 'registro_cliente' %}">Crea tu cuenta</a></p>
+    </section>
+</div>
+{% endblock %}

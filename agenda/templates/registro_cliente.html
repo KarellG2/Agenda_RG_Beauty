@@ -1,0 +1,23 @@
+{% extends "base_template.html" %}
+
+{% block title %}Crear cuenta | RG Beauty{% endblock %}
+
+{% block content %}
+<div class="cliente-page">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Bienvenida a RG Beauty</p>
+        <h1>Crea tu cuenta</h1>
+        <p>Registra tus datos para guardar y consultar tus reservas.</p>
+    </header>
+
+    <section class="cliente-panel account-panel" aria-labelledby="account-title">
+        <h2 id="account-title">Datos de tu cuenta</h2>
+        <form method="post" action="{% url 'registro_cliente' %}" class="account-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="agenda-button">Crear cuenta</button>
+        </form>
+        <p class="account-prompt">¿Ya tienes cuenta? <a href="{% url 'login_cliente' %}">Inicia sesión</a></p>
+    </section>
+</div>
+{% endblock %}

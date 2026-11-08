@@ -1,17 +1,47 @@
-<!-- Formulario de login para administradores -->
+{% extends "base_template.html" %}
+{% load static %}
 
-{% extends 'base_template.html' %}
+{% block title %}Acceso de administración | RG Beauty{% endblock %}
 
-{% block title %}Login Administrador | RG Beauty{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'acceso.css' %}">
+{% endblock %}
+
+{% block topbar %}{% endblock %}
 
 {% block content %}
+<div class="auth-page">
+    <section class="auth-card" aria-labelledby="admin-login-title">
+        <a class="auth-brand" href="{% url 'home' %}" aria-label="Volver al inicio">
+            <img src="{% static 'assets/Icon.png' %}" alt="RG Beauty">
+        </a>
+        <header class="auth-heading">
+            <p class="cliente-eyebrow">Acceso seguro</p>
+            <h1 id="admin-login-title">Bienvenida de vuelta</h1>
+            <p>Ingresa para administrar la agenda de RG Beauty.</p>
+        </header>
 
-<h1>Login Administrador</h1>
-<form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}">
-    {{ form.as_p }}
-    <button type="submit">Iniciar sesión</button>
-</form>
+        <form method="post" action="{% url 'login' %}" class="auth-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {% if form.non_field_errors %}
+                <ul class="auth-errors">{{ form.non_field_errors }}</ul>
+            {% endif %}
+            <div class="auth-field">
+                <label for="{{ form.nombre.id_for_label }}">Usuario administrador</label>
+                {{ form.nombre }}
+                {{ form.nombre.errors }}
+            </div>
+            <div class="auth-field">
+                <label for="{{ form.password.id_for_label }}">Contraseña</label>
+                {{ form.password }}
+                {{ form.password.errors }}
+            </div>
+            <button type="submit" class="auth-submit">Iniciar sesión</button>
+        </form>
 
+        <p class="auth-footer">¿Eres cliente? <a href="{% url 'login_cliente' %}">Inicia sesión aquí</a></p>
+        <a class="auth-back" href="{% url 'acceso' %}">← Volver a elegir tipo de acceso</a>
+    </section>
+</div>
 {% endblock %}

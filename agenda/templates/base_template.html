@@ -21,33 +21,40 @@
     <div class="app-shell">
         <header>
             {% block topbar %}
+            {% if user.is_authenticated and user.is_staff %}
+            {% include "admin_navbar.html" %}
+            {% else %}
             <nav class="navbar navbar-expand-lg sticky-top site-navbar" aria-label="Navegación principal">
                 <div class="site-header container d-flex justify-content-between"><!-- div header -->
                     <a class="navbar-brand align-items-center" href="{% url 'home' %}"> 
                         <img src="{% static 'assets/Icon.png' %}" alt="Logo de RG Beauty" class="icon"> <!-- Logo de RG Beauty -->
                     </a>
-                    <a href="{% url 'vista_administracion' %}" class="toggle-btn" aria-label="Cambiar a la vista de administración">Login Administración</a>
-                    
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'acceso' %}" class="toggle-btn" aria-label="Iniciar sesión">Iniciar sesión</a>
+                    {% endif %}
 
                     <div class="header-buttons">
                         <ul>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'agendar_cita' %}">Agendar cita</a></li>
                             <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'ver_citas_cliente' %}">Ver citas</a></li>
-                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'login_cliente'%}">Iniciar Sesión</a></li>
-                            <form method="post"
-                                action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="nav-item btn btn-nav" aria-label="Cerrar sesión de administrador">
-                                    <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
-                                </button>
-                            </form>
-
+                            {% if user.is_authenticated %}
+                            <li class="nav-item btn btn-nav">
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="nav-link">Cerrar sesión</button>
+                                </form>
+                            </li>
+                            {% else %}
+                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'acceso' %}">Acceder</a></li>
+                            <li class="nav-item btn btn-nav"><a class="nav-link" href="{% url 'registro_cliente' %}">Crear cuenta</a></li>
+                            {% endif %}
                         </ul>
                     </div>
 
                 </div> <!-- div header -->
             </nav> <!-- nav -->
+            {% endif %}
             {% endblock %}
         </header>
 

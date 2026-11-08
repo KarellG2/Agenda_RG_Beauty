@@ -27,6 +27,50 @@
     margin-top: 8px;
 }
 
+.account-prompt {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font: 0.82rem/1.5 "Segoe UI", sans-serif;
+}
+
+.account-prompt a {
+    color: var(--button);
+    font-weight: 600;
+}
+
+.account-panel {
+    width: min(100%, 560px);
+}
+
+.account-panel h2 {
+    margin-bottom: 16px;
+}
+
+.account-form {
+    display: grid;
+    gap: 12px;
+}
+
+.account-form p {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    color: var(--muted);
+    font: 0.85rem/1.4 "Segoe UI", sans-serif;
+}
+
+.account-form .helptext {
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+
+.account-form .errorlist {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--danger);
+    font-size: 0.8rem;
+}
+
 @media (max-width: 700px) {
     .cliente-panel {
         padding: 18px;

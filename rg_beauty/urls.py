@@ -22,6 +22,7 @@ from agenda import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('landing_cliente/', views.landing_cliente, name='landing_cliente'),
     path('agendar_cita/', views.agendar_cita, name='agendar_cita'),
     path('ver_citas_cliente/', views.ver_citas_cliente, name='ver_citas_cliente'),
     path('vista_administracion/', views.vista_administracion, name='vista_administracion'),
@@ -32,8 +33,10 @@ urlpatterns = [
     path('auditoria_admin/', views.auditoria_admin, name='auditoria_admin'),
     path('configuracion_admin/', views.configuracion_admin, name='configuracion_admin'),
     path('acceso_denegado/', views.acceso_denegado, name='acceso_denegado'),
+    path('acceso/', views.acceso, name='acceso'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('login_cliente/', views.login_cliente, name='login_cliente')
+    path('login_cliente/', views.login_cliente, name='login_cliente'),
+    path('registro_cliente/', views.registro_cliente, name='registro_cliente'),
 
 ]
