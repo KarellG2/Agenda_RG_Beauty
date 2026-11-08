@@ -1,0 +1,37 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="servicios" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <section aria-labelledby="servicio-admin-title">
+        <h1 class="admin-section-title" id="servicio-admin-title">{{ titulo }}</h1>
+        <form class="admin-card service-form" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="service-form-errors" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for field in form %}
+                <div class="service-form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="service-form-actions">
+                <button class="primary-btn" type="submit">{{ texto_boton }}</button>
+                <a class="btn-outline" href="{% url 'servicios_admin' %}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

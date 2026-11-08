@@ -1,29 +1,32 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import *
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Q
+from django.db.models import Max, Min, Q
+from django.db.models.deletion import ProtectedError
+from django.views.decorators.http import require_POST
 from .models import *
+
 
 def es_staff(user):
     return user.is_authenticated and user.is_staff
 
-# Create your views here.
 
+# Create your views here.
 def home(request):
     citas = Reserva.objects.select_related(
         'id_cliente',
         'id_personal_servicio',
-        'id_personal'
-        ).all()
-    
+        'id_personal',
+    ).all()
     return render(request, 'home_cliente.html', {'citas': citas})
+
 
 def dashboard(request):
     return render(request, 'dashboard.html')
 
+<<<<<<< HEAD
 def agendar_cita(request):
     return render(request, 'agendar_cita_cliente.html')
 
@@ -44,11 +47,14 @@ def ver_citas_cliente(request):
     ).order_by('fecha', 'hora')
     
     return render(request, 'ver_citas_cliente.html', {'citas': citas})
+=======
+>>>>>>> 5e8b77262c1d3e549eda0a03f3d9cee82d212379
 
 def agendar_cita(request):
     if request.method == 'POST':
         form = ReservaForm(request.POST)
         if form.is_valid():
+<<<<<<< HEAD
             cliente = Cliente.objects.get_or_create(
                 correo=form.cleaned_data['correo_cliente'],
                 defaults={
@@ -62,18 +68,30 @@ def agendar_cita(request):
             reserva.save()
             return redirect('home')
 
+=======
+            form.save()
+            messages.success(request, 'Reserva creada correctamente. Tu cita ha sido registrada.')
+            return redirect('home')
+>>>>>>> 5e8b77262c1d3e549eda0a03f3d9cee82d212379
     else:
         form = ReservaForm()
     return render(request, 'agendar_cita_cliente.html', {'form': form})
 #VISTA ADMINISTRACION
 
+
+def ver_citas(request):
+    return render(request, 'ver_citas_cliente.html')
+
+
 @user_passes_test(es_staff, login_url='login')
 def vista_administracion(request):
     return render(request, 'vista_administracion.html')
 
+
 @user_passes_test(es_staff, login_url='login')
 def agendar_cita_admin(request):
     return render(request, 'agendar_cita_admin.html')
+
 
 @user_passes_test(es_staff, login_url='login')
 def clientes_admin(request):
@@ -84,33 +102,102 @@ def clientes_admin(request):
         resultados = Cliente.objects.all()
     return render(request, 'clientes_admin.html', {'clientes': resultados})
 
+
 @user_passes_test(es_staff, login_url='login')
 def servicios_admin(request):
+<<<<<<< HEAD
     servicios = Servicio.objects.all()
     return render(request, 'servicios_admin.html', {'servicios': servicios})
+=======
+    servicios = Servicio.objects.annotate(
+        precio_minimo=Min('personal_asignado__precio'),
+        precio_maximo=Max('personal_asignado__precio'),
+    ).select_related('categoria').order_by('nombre_s')
+    return render(request, 'servicios_admin.html', {'servicios': servicios})
+
+
+@user_passes_test(es_staff, login_url='login')
+def servicio_crear(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Servicio creado correctamente.')
+            return redirect('servicios_admin')
+    else:
+        form = ServicioForm()
+
+    return render(request, 'servicio_admin.html', {
+        'form': form,
+        'titulo': 'Agregar servicio',
+        'texto_boton': 'Crear servicio',
+    })
+
+
+@user_passes_test(es_staff, login_url='login')
+def servicio_editar(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+    if request.method == 'POST':
+        form = ServicioForm(request.POST, instance=servicio)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Servicio actualizado correctamente.')
+            return redirect('servicios_admin')
+    else:
+        form = ServicioForm(instance=servicio)
+
+    return render(request, 'servicio_admin.html', {
+        'form': form,
+        'servicio': servicio,
+        'titulo': 'Editar servicio',
+        'texto_boton': 'Guardar cambios',
+    })
+
+
+@user_passes_test(es_staff, login_url='login')
+@require_POST
+def servicio_eliminar(request, pk):
+    servicio = get_object_or_404(Servicio, pk=pk)
+    try:
+        servicio.delete()
+    except ProtectedError:
+        messages.error(
+            request,
+            'No se puede eliminar este servicio porque está asignado a profesionales o tiene reservas asociadas.',
+        )
+    else:
+        messages.success(request, 'Servicio eliminado correctamente.')
+    return redirect('servicios_admin')
+
+>>>>>>> 5e8b77262c1d3e549eda0a03f3d9cee82d212379
 
 @user_passes_test(es_staff, login_url='login')
 def notificaciones_admin(request):
     return render(request, 'notificaciones_admin.html')
 
+
 @user_passes_test(es_staff, login_url='login')
 def auditoria_admin(request):
     return render(request, 'auditoria_admin.html')
+
 
 @user_passes_test(es_staff, login_url='login')
 def configuracion_admin(request):
     return render(request, 'configuracion_admin.html')
 
+<<<<<<< HEAD
 #MANEJO LOGIN Y LOGOUT 
+=======
+>>>>>>> 5e8b77262c1d3e549eda0a03f3d9cee82d212379
 
 def acceso_denegado(request):
     return render(request, 'acceso_denegado.html')
 
+
 def login_view(request):
-    
     if request.user.is_authenticated:
-        return redirect('vista_administracion')  
-    
+        return redirect('vista_administracion')
+
     if request.method == 'POST':
         form = AutenticacionForm(request.POST)
         if form.is_valid():
@@ -119,15 +206,17 @@ def login_view(request):
             user = authenticate(request, username=nombre, password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, 'Sesión iniciada correctamente.')
                 return redirect('vista_administracion')
-            else:
-                messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+            messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
     else:
         form = AutenticacionForm()
     return render(request, 'login_admin.html', {'form': form})
 
+
 def logout_view(request):
     logout(request)
+<<<<<<< HEAD
     request.session.pop('cliente_id', None)
     return redirect('home')
 def login_cliente_legacy(request):
@@ -168,3 +257,7 @@ def login_cliente(request):
     else:
         form = AutenticacionClienteForm()
     return render(request, 'login_cliente.html', {'form': form})
+=======
+    messages.info(request, 'Sesión cerrada correctamente.')
+    return redirect('home')
+>>>>>>> 5e8b77262c1d3e549eda0a03f3d9cee82d212379

@@ -13,26 +13,48 @@
 
 {% block content %}
 <div class="admin-section-page services-page">
-    <!-- <div class="admin-demo-notice" role="note">
-        Modo de demostración: esta vista no se conecta ni guarda datos en la base de datos.
-    </div>
- -->
     <section aria-labelledby="services-title">
         <h1 class="admin-section-title" id="services-title">Servicios</h1>
-        <!-- <p class="admin-section-description">Catálogo básico de tratamientos. Precios de referencia en CLP; no se realizan ventas ni pagos aquí.</p> -->
+        <p class="admin-section-description">Administra el catálogo de tratamientos. Los precios corresponden a los valores asignados a cada profesional.</p>
+        <a class="primary-btn services-add-button" href="{% url 'servicio_crear' %}">Agregar servicio</a>
 
-        <div class="services-grid">
         {% if servicios %}
-        {% for servicio in servicios %}
-        <article class="admin-card service-item">
-            <h2>{{ servicio.nombre_s }}</h2>
-            <p>{{ servicio.descripcion }}</p>
-        </article>
-        {% endfor %}
+            <div class="services-grid">
+                {% for servicio in servicios %}
+                    <article class="admin-card service-item">
+                        <div class="service-details">
+                            <h2>{{ servicio.nombre_s }}</h2>
+                            {% if servicio.categoria %}
+                                <p class="service-category">{{ servicio.categoria.nombre }}</p>
+                            {% endif %}
+                            {% if servicio.descripcion %}
+                                <p class="service-description">{{ servicio.descripcion }}</p>
+                            {% endif %}
+                            {% if servicio.precio_minimo != None %}
+                                {% if servicio.precio_minimo == servicio.precio_maximo %}
+                                    <p>${{ servicio.precio_minimo|floatformat:0 }} CLP</p>
+                                {% else %}
+                                    <p>Desde ${{ servicio.precio_minimo|floatformat:0 }} CLP</p>
+                                {% endif %}
+                            {% else %}
+                                <p>Precio pendiente de asignar</p>
+                            {% endif %}
+                        </div>
+                        <div class="service-actions">
+                            <a class="btn-outline" href="{% url 'servicio_editar' servicio.pk %}">Editar</a>
+                            <form method="post" action="{% url 'servicio_eliminar' servicio.pk %}" onsubmit="return confirm('¿Eliminar este servicio?');">
+                                {% csrf_token %}
+                                <button class="btn-outline" type="submit">Eliminar</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
         {% else %}
-        <p>No hay servicios disponibles.</p>
+            <div class="admin-card admin-empty-state" role="status">
+                <p>Aún no hay servicios registrados. Agrega el primero para comenzar.</p>
+            </div>
         {% endif %}
-        </div>
 
         
         <aside class="admin-card services-about">
