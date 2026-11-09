@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from uuid import uuid4
 
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import *
 from django.contrib import messages
@@ -79,6 +80,91 @@ def ver_citas_cliente(request):
     ).order_by('fecha', 'hora')
     
     return render(request, 'ver_citas_cliente.html', {'citas': citas})
+
+
+def _cliente_actual(request):
+    if request.user.is_authenticated and not request.user.is_staff:
+        cliente = Cliente.objects.filter(usuario=request.user).first()
+        if cliente:
+            return cliente
+    cliente_id = request.session.get('cliente_id')
+    if cliente_id:
+        return Cliente.objects.filter(id_cliente=cliente_id).first()
+    return None
+
+
+def _reserva_permitida(request, pk):
+    cliente = _cliente_actual(request)
+    if not request.user.is_staff and cliente is None:
+        return None, redirect('login_cliente')
+
+    reserva = get_object_or_404(
+        Reserva.objects.select_related(
+            'id_cliente',
+            'id_personal',
+            'id_personal_servicio__id_servicio',
+            'id_personal_servicio__id_personal',
+        ).prefetch_related('etiquetas'),
+        pk=pk,
+    )
+    if not request.user.is_staff and reserva.id_cliente_id != cliente.pk:
+        return None, render(request, 'acceso_denegado.html', status=403)
+    return reserva, None
+
+
+def reserva_detalle(request, pk):
+    reserva, respuesta = _reserva_permitida(request, pk)
+    if respuesta:
+        return respuesta
+    return render(request, 'reserva_detalle.html', {'reserva': reserva})
+
+
+def reserva_editar(request, pk):
+    reserva, respuesta = _reserva_permitida(request, pk)
+    if respuesta:
+        return respuesta
+
+    es_admin = request.user.is_staff
+    form_class = ReservaAdminForm if es_admin else ReservaForm
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=reserva, cliente=reserva.id_cliente)
+        if form.is_valid():
+            with transaction.atomic():
+                reserva = form.save(commit=False)
+                reserva.id_personal = reserva.id_personal_servicio.id_personal
+                reserva.save()
+                form.save_m2m()
+            messages.success(request, 'La reserva se actualizó correctamente.')
+            return redirect('reserva_detalle', pk=reserva.pk)
+    elif request.method == 'GET':
+        form = form_class(instance=reserva, cliente=reserva.id_cliente)
+    else:
+        return HttpResponseNotAllowed(['GET', 'POST'])
+
+    return render(request, 'reserva_admin_form.html', {
+        'form': form,
+        'reserva': reserva,
+        'es_admin': es_admin,
+    })
+
+
+def reserva_eliminar(request, pk):
+    reserva, respuesta = _reserva_permitida(request, pk)
+    if respuesta:
+        return respuesta
+    if request.method == 'GET':
+        return render(request, 'reserva_confirmar_eliminar.html', {
+            'reserva': reserva,
+        })
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['GET', 'POST'])
+
+    reserva.delete()
+    messages.success(request, 'La reserva se eliminó correctamente.')
+    return redirect(
+        'agendar_cita_admin' if request.user.is_staff else 'ver_citas_cliente'
+    )
+
 
 def agendar_cita(request):
     cliente = None
@@ -451,7 +537,8 @@ def servicio_eliminar(request, pk):
     except ProtectedError:
         messages.error(
             request,
-            'No se puede eliminar este servicio porque está asignado a un profesional o a una reserva.',
+            'No se puede eliminar este servicio porque tiene reservas asociadas. '
+            'Primero gestiona o elimina esas reservas.',
         )
     else:
         messages.success(request, 'El servicio se eliminó correctamente.')

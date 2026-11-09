@@ -21,31 +21,37 @@
             <div class="campo-formulario">
                 {{ form.id_personal_servicio.label_tag }}
                 {{ form.id_personal_servicio }}
+                {% if form.id_personal_servicio.help_text %}<small>{{ form.id_personal_servicio.help_text }}</small>{% endif %}
                 {{ form.id_personal_servicio.errors }}
             </div>
             <div class="campo-formulario">
                 {{ form.nombre_cliente.label_tag }}
                 {{ form.nombre_cliente }}
+                {% if form.nombre_cliente.help_text %}<small>{{ form.nombre_cliente.help_text }}</small>{% endif %}
                 {{ form.nombre_cliente.errors }}
             </div>
             <div class="campo-formulario">
                 {{ form.telefono_cliente.label_tag }}
                 {{ form.telefono_cliente }}
+                {% if form.telefono_cliente.help_text %}<small>{{ form.telefono_cliente.help_text }}</small>{% endif %}
                 {{ form.telefono_cliente.errors }}
             </div>
             <div class="campo-formulario">
                 {{ form.correo_cliente.label_tag }}
                 {{ form.correo_cliente }}
+                {% if form.correo_cliente.help_text %}<small>{{ form.correo_cliente.help_text }}</small>{% endif %}
                 {{ form.correo_cliente.errors }}
             </div>
             <div class="campo-formulario">
                 {{ form.fecha.label_tag }}
                 {{ form.fecha }}
+                {% if form.fecha.help_text %}<small>{{ form.fecha.help_text }}</small>{% endif %}
                 {{ form.fecha.errors }}
             </div>
             <div class="campo-formulario">
                 {{ form.hora.label_tag }}
                 {{ form.hora }}
+                {% if form.hora.help_text %}<small>{{ form.hora.help_text }}</small>{% endif %}
                 {{ form.hora.errors }}
             </div>
             <div class="campo-formulario">
@@ -53,6 +59,7 @@
                 <div class="tag-list">
                     {{ form.etiquetas }}
                 </div>
+                {% if form.etiquetas.help_text %}<small>{{ form.etiquetas.help_text }}</small>{% endif %}
                 {{ form.etiquetas.errors }}
                 {% if not form.etiquetas.field.queryset %}
                     <small>Por ahora no hay etiquetas disponibles.</small>

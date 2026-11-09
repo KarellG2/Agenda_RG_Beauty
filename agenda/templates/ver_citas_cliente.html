@@ -38,6 +38,7 @@
                                 <th>Servicio</th>
                                 <th>Etiquetas</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
 
@@ -82,6 +83,13 @@
                                         <span class="estado-cita estado-{{ cita.estado }}">
                                             {{ cita.get_estado_display }}
                                         </span>
+                                    </td>
+                                    <td>
+                                        <div class="reserva-list-actions">
+                                            <a class="btn-outline" href="{% url 'reserva_detalle' cita.pk %}">Detalle</a>
+                                            <a class="btn-outline" href="{% url 'reserva_editar' cita.pk %}">Editar</a>
+                                            <a class="btn-outline" href="{% url 'reserva_eliminar' cita.pk %}">Eliminar</a>
+                                        </div>
                                     </td>
                                 </tr>
 

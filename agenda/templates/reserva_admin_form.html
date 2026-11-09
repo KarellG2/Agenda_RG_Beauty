@@ -1,0 +1,35 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Editar reserva | RG Beauty{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'agendar-cliente.css' %}">{% endblock %}
+{% block topbar %}{% if es_admin %}{% include "admin_navbar.html" with active_page="agenda" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="cliente-page agenda-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Gestión de citas</p>
+        <h1>Editar reserva</h1>
+        <p>Actualiza el servicio, la fecha, el horario o las etiquetas.</p>
+    </header>
+    <section class="cliente-panel reserva-panel" aria-labelledby="reserva-edit-title">
+        <h2 id="reserva-edit-title">Reserva de {{ reserva.id_cliente.nombre_c }}</h2>
+        <form class="reserva-form" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+            {% for field in form %}
+                <div class="campo-formulario">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="reserva-form-actions">
+                <button type="submit" class="primary-btn">Guardar cambios</button>
+                <a class="btn-outline" href="{% url 'reserva_detalle' reserva.pk %}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

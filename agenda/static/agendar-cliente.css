@@ -73,6 +73,59 @@
     font-size: 0.82rem;
 }
 
+.reserva-form-actions,
+.reserva-list-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.reserva-form-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+}
+
+.reserva-form-actions form {
+    margin: 0;
+}
+
+.reserva-detail-list {
+    display: grid;
+    grid-template-columns: minmax(110px, 0.35fr) minmax(0, 1fr);
+    gap: 10px 16px;
+    margin: 0 0 22px;
+}
+
+.reserva-detail-list dt {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.reserva-detail-list dd {
+    min-width: 0;
+    margin: 0;
+}
+
+.danger-btn {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border: 1px solid var(--danger);
+    border-radius: 999px;
+    color: var(--danger);
+    background: #fffafc;
+    font: 600 0.85rem "Segoe UI", sans-serif;
+    cursor: pointer;
+}
+
+.danger-btn:hover {
+    color: #fff;
+    background: var(--danger);
+}
+
 .reserva-form .primary-btn {
     min-height: 48px;
     align-self: end;
@@ -98,5 +151,14 @@
 
     .reserva-form .primary-btn {
         width: 100%;
+    }
+
+    .reserva-detail-list {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    .reserva-detail-list dd {
+        margin-bottom: 10px;
     }
 }

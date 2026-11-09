@@ -1,0 +1,39 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Detalle de reserva | RG Beauty{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'agendar-cliente.css' %}">{% endblock %}
+{% block topbar %}{% if user.is_staff %}{% include "admin_navbar.html" with active_page="agenda" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="cliente-page agenda-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Tus momentos</p>
+        <h1>Detalle de la reserva</h1>
+        <p>Revisa los datos asociados a esta cita.</p>
+    </header>
+    <section class="cliente-panel reserva-panel" aria-labelledby="reserva-detail-title">
+        <h2 id="reserva-detail-title">{{ reserva.id_personal_servicio.id_servicio.nombre_s }}</h2>
+        <dl class="reserva-detail-list">
+            <dt>Cliente</dt><dd>{{ reserva.id_cliente.nombre_c }}</dd>
+            <dt>Correo</dt><dd>{{ reserva.id_cliente.correo }}</dd>
+            <dt>Teléfono</dt><dd>{{ reserva.id_cliente.telefono }}</dd>
+            <dt>Profesional</dt><dd>{{ reserva.id_personal.nombre }}</dd>
+            <dt>Fecha</dt><dd>{{ reserva.fecha|date:"d/m/Y" }}</dd>
+            <dt>Hora</dt><dd>{{ reserva.hora|time:"H:i" }}</dd>
+            <dt>Estado</dt><dd>{{ reserva.get_estado_display }}</dd>
+            <dt>Etiquetas</dt>
+            <dd>{% for etiqueta in reserva.etiquetas.all %}<span class="appointment-tag" style="--tag-color: {{ etiqueta.color }}">{{ etiqueta.nombre }}</span>{% empty %}Sin etiquetas{% endfor %}</dd>
+        </dl>
+        <div class="reserva-form-actions">
+            <a class="primary-btn" href="{% url 'reserva_editar' reserva.pk %}">Editar reserva</a>
+            <a class="btn-outline" href="{% url 'reserva_eliminar' reserva.pk %}">Eliminar reserva</a>
+            {% if user.is_staff %}
+                <a class="btn-outline" href="{% url 'agendar_cita_admin' %}">Volver a la agenda</a>
+            {% else %}
+                <a class="btn-outline" href="{% url 'ver_citas_cliente' %}">Volver a mis citas</a>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
