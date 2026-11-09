@@ -459,6 +459,12 @@ class ClienteReservaTests(TestCase):
             'Primera visita',
         )
 
+    def test_busqueda_de_citas_inicia_vacia(self):
+        response = self.client.get(reverse('ver_citas_cliente'))
+
+        self.assertEqual(response.context['q'], '')
+        self.assertContains(response, 'value=""')
+
     def test_cliente_sin_cuenta_se_crea_automaticamente_al_reservar(self):
         self.client.logout()
         response = self.client.post(reverse('agendar_cita'), {

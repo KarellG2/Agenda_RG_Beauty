@@ -44,12 +44,13 @@ def home(request):
 def landing_cliente(request):
     cliente = get_object_or_404(Cliente, usuario=request.user)
     citas = Reserva.objects.filter(
-        id_cliente=cliente,
-        fecha__gte=date.today(),
-    ).select_related(
-        'id_personal',
-        'id_personal_servicio__id_servicio',
-    ).order_by('fecha', 'hora')
+            id_cliente=cliente
+        ).select_related(
+            'id_personal',
+            'id_personal_servicio__id_servicio',
+            'id_personal_servicio__id_personal'
+        ).prefetch_related('etiquetas').order_by('fecha', 'hora')
+        
     return render(
         request,
         'home_cliente.html',
@@ -77,9 +78,35 @@ def ver_citas_cliente(request):
         'id_personal',
         'id_personal_servicio__id_servicio',
         'id_personal_servicio__id_personal'
-    ).order_by('fecha', 'hora')
+    ).prefetch_related('etiquetas').order_by('fecha', 'hora') #<- prefetch optimizar
     
-    return render(request, 'ver_citas_cliente.html', {'citas': citas})
+    q = request.GET.get('q', '').strip()
+    if q:
+        citas = citas.filter(
+            # filtro servicio o profesional
+            Q(id_personal_servicio__id_servicio__nombre_s__icontains=q) |
+            Q(id_personal__nombre__icontains=q)
+        ).distinct()
+        
+    servicio_id = request.GET.get('servicio', '')
+    if servicio_id.isdigit():
+        citas = citas.filter(
+            id_personal_servicio__id_servicio_id=int(servicio_id)
+        )
+    
+    paginator = Paginator(citas, 5)  # 5 citas por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    servicios = Servicio.objects.order_by('nombre_s')
+    
+    return render(request, 
+                'ver_citas_cliente.html', {
+                'citas': page_obj,
+                'servicios': servicios,
+                'servicio_id': servicio_id,
+                'q': q,
+            })
 
 
 def _cliente_actual(request):

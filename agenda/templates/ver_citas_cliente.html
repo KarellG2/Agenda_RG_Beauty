@@ -21,7 +21,25 @@
             <h2 id="proximas-citas-title">
                 Próximas citas
             </h2>
-
+            <form class="filters-grid" method="get" style="margin-bottom: 20px;">
+                <div class="filter-field">
+                    <label for="search-q">Buscar (profesional o servicio)</label>
+                    <input id="search-q" name="q" type="search" value="{{ q }}" placeholder="Ej: Manicure o Ana">
+                </div>
+                <div class="filter-field">
+                    <label for="filter-servicio">Filtrar por servicio</label>
+                    <select id="filter-servicio" name="servicio">
+                        <option value="">Todos los servicios</option>
+                        {% for s in servicios %}
+                            <option value="{{ s.pk }}" {% if servicio_id == s.pk|stringformat:'s' %}selected{% endif %}>{{ s.nombre_s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="filter-submit">Aplicar</button>
+                    <a href="{% url 'ver_citas_cliente' %}" class="btn-outline" style="padding: 10px 15px; display: inline-block;">Limpiar</a>
+                </div>
+            </form>
             {% if citas %}
 
                 <div class="citas-table-wrap">
@@ -98,6 +116,24 @@
                         </tbody>
 
                     </table>
+
+                </div>
+                
+                <div class="pagination">
+                    <span class="steps">
+                        {% if citas.has_previous %}
+                        <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">&laquo; primera</a>
+                        <a href="?page={{ citas.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">anterior</a>
+                        {% endif %}
+                        <span class="current">
+                            página {{ citas.number }} de {{ citas.paginator.num_pages }}.
+                        </span>
+                        
+                        {% if citas.has_next %}
+                            <a href="?page={{ citas.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id }}{% endif %}" class="btn btn-nav">siguiente</a>
+                            <a href="?page={{ citas.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id }}{% endif %}" class="btn btn-nav">última &raquo;</a>
+                        
+                        {% endif %}
 
                 </div>
 
