@@ -1,0 +1,27 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Eliminar reserva | RG Beauty{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'agendar-cliente.css' %}">{% endblock %}
+{% block topbar %}{% if user.is_staff %}{% include "admin_navbar.html" with active_page="agenda" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="cliente-page agenda-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Gestión de citas</p>
+        <h1>Eliminar reserva</h1>
+    </header>
+    <section class="cliente-panel reserva-panel" aria-labelledby="delete-title">
+        <h2 id="delete-title">¿Deseas eliminar esta reserva?</h2>
+        <p>{{ reserva.id_personal_servicio.id_servicio.nombre_s }} con {{ reserva.id_personal.nombre }}, el {{ reserva.fecha|date:"d/m/Y" }} a las {{ reserva.hora|time:"H:i" }}.</p>
+        <p>Esta acción no se puede deshacer.</p>
+        <div class="reserva-form-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="danger-btn">Sí, eliminar reserva</button>
+            </form>
+            <a class="btn-outline" href="{% url 'reserva_detalle' reserva.pk %}">Cancelar</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

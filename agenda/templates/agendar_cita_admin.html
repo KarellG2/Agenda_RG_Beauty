@@ -104,6 +104,11 @@
                         {% endif %}
                     </div>
                     <span class="appointment-status status-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span>
+                    <div class="appointment-actions">
+                        <a class="btn-outline" href="{% url 'reserva_detalle' reserva.pk %}">Detalle</a>
+                        <a class="btn-outline" href="{% url 'reserva_editar' reserva.pk %}">Editar</a>
+                        <a class="btn-outline" href="{% url 'reserva_eliminar' reserva.pk %}">Eliminar</a>
+                    </div>
                 </article>
             {% empty %}
                 <div class="filters-empty">

@@ -125,7 +125,7 @@ class ServicioPersonal(models.Model):
 
     id_servicio = models.ForeignKey(
         Servicio,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         db_column='id_servicio',
         related_name='personal_asignado'
     )

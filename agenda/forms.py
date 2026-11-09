@@ -18,7 +18,7 @@ HORARIOS_DISPONIBLES = [
 ]
 
 
-def reserva_se_superpone(servicio, fecha, hora):
+def reserva_se_superpone(servicio, fecha, hora, excluir_reserva=None):
     inicio_nuevo = datetime.combine(fecha, hora)
     fin_nuevo = inicio_nuevo + timedelta(
         minutes=servicio.duracion_aproximada,
@@ -29,6 +29,8 @@ def reserva_se_superpone(servicio, fecha, hora):
     ).exclude(estado='cancelado').select_related('id_personal_servicio')
 
     for reserva in reservas_existentes:
+        if excluir_reserva and reserva.pk == excluir_reserva.pk:
+            continue
         inicio_existente = datetime.combine(fecha, reserva.hora)
         fin_existente = inicio_existente + timedelta(
             minutes=reserva.id_personal_servicio.duracion_aproximada,
@@ -408,6 +410,7 @@ class ReservaForm(forms.ModelForm):
                 servicio,
                 fecha,
                 datetime.strptime(hora, '%H:%M').time(),
+                excluir_reserva=self.instance if self.instance.pk else None,
             )
         ):
             self.add_error(
@@ -415,6 +418,17 @@ class ReservaForm(forms.ModelForm):
                 'Ese profesional ya tiene una cita en ese horario.',
             )
         return cleaned_data
+
+
+class ReservaAdminForm(ReservaForm):
+    estado = forms.ChoiceField(
+        choices=Reserva.ESTADOS,
+        label='Estado de la reserva',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+
+    class Meta(ReservaForm.Meta):
+        fields = [*ReservaForm.Meta.fields, 'estado']
 
 
 class AutenticacionForm(forms.Form):

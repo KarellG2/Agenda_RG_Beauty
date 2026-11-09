@@ -281,7 +281,7 @@ class ServicioAdminTests(TestCase):
         self.assertRedirects(response, reverse('servicios_admin'))
         self.assertFalse(Servicio.objects.filter(pk=servicio.pk).exists())
 
-    def test_no_eliminar_servicio_asignado_a_profesional(self):
+    def test_eliminar_servicio_elimina_asignacion_profesional(self):
         rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
         personal = Personal.objects.create(
             nombre='Profesional',
@@ -306,8 +306,42 @@ class ServicioAdminTests(TestCase):
         )
 
         self.assertRedirects(response, reverse('servicios_admin'))
+        self.assertFalse(Servicio.objects.filter(pk=servicio.pk).exists())
+        self.assertFalse(ServicioPersonal.objects.filter(id_servicio=servicio).exists())
+
+    def test_no_eliminar_servicio_con_reservas(self):
+        cliente = Cliente.objects.create(
+            nombre_c='Cliente con reserva',
+            telefono='123456',
+            correo='reserva@example.com',
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Servicio reservado',
+            descripcion='Servicio con reserva asociada',
+        )
+        asignacion = ServicioPersonal.objects.create(
+            id_personal=self.personal,
+            id_servicio=servicio,
+            duracion_aproximada=30,
+            precio=18000,
+        )
+        reserva = Reserva.objects.create(
+            id_cliente=cliente,
+            id_personal=self.personal,
+            id_personal_servicio=asignacion,
+            fecha='2027-01-15',
+            hora='10:00',
+        )
+
+        response = self.client.post(
+            reverse('servicio_eliminar', args=[servicio.pk]),
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse('servicios_admin'))
         self.assertTrue(Servicio.objects.filter(pk=servicio.pk).exists())
-        self.assertContains(response, 'No se puede eliminar este servicio')
+        self.assertTrue(Reserva.objects.filter(pk=reserva.pk).exists())
+        self.assertContains(response, 'tiene reservas asociadas')
 
     def test_listado_muestra_servicios_guardados(self):
         categoria = CategoriaServicio.objects.create(nombre='Uñas')
@@ -490,6 +524,131 @@ class ClienteReservaTests(TestCase):
             response,
             f'min="{timezone.localdate().isoformat()}"',
         )
+
+
+class ReservaCrudTests(TestCase):
+    def setUp(self):
+        user = get_user_model().objects.create_user(
+            username='cliente-crud',
+            password='test-password',
+        )
+        self.cliente = Cliente.objects.create(
+            nombre_c='Cliente CRUD',
+            telefono='+56912345678',
+            correo='crud@example.com',
+            usuario=user,
+        )
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        self.personal = Personal.objects.create(
+            nombre='Profesional CRUD',
+            credenciales='Certificación',
+            años_experiencia=3,
+            id_rol=rol,
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure CRUD',
+            descripcion='Servicio para pruebas',
+        )
+        self.asignacion = ServicioPersonal.objects.create(
+            id_personal=self.personal,
+            id_servicio=servicio,
+            duracion_aproximada=45,
+            precio=18000,
+        )
+        self.etiqueta = Etiqueta.objects.create(nombre='Cliente frecuente')
+        self.reserva = Reserva.objects.create(
+            id_cliente=self.cliente,
+            id_personal=self.personal,
+            id_personal_servicio=self.asignacion,
+            fecha='2027-01-15',
+            hora='10:00',
+        )
+        self.reserva.etiquetas.add(self.etiqueta)
+        self.client.force_login(user)
+
+    def test_detalle_muestra_reserva_y_etiqueta(self):
+        response = self.client.get(
+            reverse('reserva_detalle', args=[self.reserva.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Manicure CRUD')
+        self.assertContains(response, 'Profesional CRUD')
+        self.assertContains(response, 'Cliente frecuente')
+
+    def test_editar_reserva_guarda_cambios_y_etiquetas(self):
+        etiqueta_nueva = Etiqueta.objects.create(nombre='Reagendada')
+        response = self.client.post(
+            reverse('reserva_editar', args=[self.reserva.pk]),
+            {
+                'id_personal_servicio': self.asignacion.pk,
+                'fecha': '2027-01-16',
+                'hora': '10:00',
+                'etiquetas': [etiqueta_nueva.pk],
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('reserva_detalle', args=[self.reserva.pk]),
+        )
+        self.reserva.refresh_from_db()
+        self.assertEqual(self.reserva.fecha.isoformat(), '2027-01-16')
+        self.assertEqual(list(self.reserva.etiquetas.all()), [etiqueta_nueva])
+        self.assertEqual(self.reserva.id_cliente, self.cliente)
+
+    def test_editar_reserva_rechaza_horario_ocupado(self):
+        Reserva.objects.create(
+            id_cliente=self.cliente,
+            id_personal=self.personal,
+            id_personal_servicio=self.asignacion,
+            fecha='2027-01-15',
+            hora='11:00',
+        )
+        response = self.client.post(
+            reverse('reserva_editar', args=[self.reserva.pk]),
+            {
+                'id_personal_servicio': self.asignacion.pk,
+                'fecha': '2027-01-15',
+                'hora': '11:00',
+                'etiquetas': [self.etiqueta.pk],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ese profesional ya tiene una cita en ese horario.')
+        self.reserva.refresh_from_db()
+        self.assertEqual(self.reserva.hora.strftime('%H:%M'), '10:00')
+
+    def test_eliminar_reserva_pide_confirmacion_y_usa_post(self):
+        url = reverse('reserva_eliminar', args=[self.reserva.pk])
+        confirmacion = self.client.get(url)
+
+        self.assertEqual(confirmacion.status_code, 200)
+        self.assertTrue(Reserva.objects.filter(pk=self.reserva.pk).exists())
+        eliminacion = self.client.post(url)
+        self.assertRedirects(eliminacion, reverse('ver_citas_cliente'))
+        self.assertFalse(Reserva.objects.filter(pk=self.reserva.pk).exists())
+
+    def test_cliente_no_accede_a_reserva_ajena(self):
+        otro_usuario = get_user_model().objects.create_user(
+            username='otro-cliente',
+            password='test-password',
+        )
+        Cliente.objects.create(
+            nombre_c='Otro cliente',
+            telefono='+56987654321',
+            correo='otro@example.com',
+            usuario=otro_usuario,
+        )
+        self.client.force_login(otro_usuario)
+
+        for ruta in ('reserva_detalle', 'reserva_editar', 'reserva_eliminar'):
+            with self.subTest(ruta=ruta):
+                response = self.client.get(
+                    reverse(ruta, args=[self.reserva.pk]),
+                )
+                self.assertEqual(response.status_code, 403)
 
 
 class AdminLiveDataTests(TestCase):
