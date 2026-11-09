@@ -1,7 +1,8 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from .models import *
 
 
@@ -41,12 +42,14 @@ class ServicioForm(forms.ModelForm):
     personal = forms.ModelChoiceField(
         queryset=Personal.objects.none(),
         label='Profesional a cargo',
+        help_text='Selecciona quién realizará este servicio.',
         error_messages={'required': 'Selecciona al profesional a cargo.'},
         widget=forms.Select(attrs={'class': 'admin-field'}),
     )
     duracion_aproximada = forms.IntegerField(
         min_value=1,
         label='Duración aproximada (minutos)',
+        help_text='Tiempo que se reservará en la agenda para este servicio.',
         error_messages={
             'required': 'Indica la duración aproximada.',
             'min_value': 'La duración debe ser de al menos un minuto.',
@@ -62,6 +65,7 @@ class ServicioForm(forms.ModelForm):
         max_digits=10,
         decimal_places=2,
         label='Precio (CLP)',
+        help_text='Ingresa el valor del servicio en pesos chilenos.',
         error_messages={
             'required': 'Indica el precio del servicio.',
             'min_value': 'El precio no puede ser negativo.',
@@ -81,6 +85,11 @@ class ServicioForm(forms.ModelForm):
             'nombre_s': 'Nombre del servicio',
             'descripcion': 'Descripción',
             'categoria': 'Categoría',
+        }
+        help_texts = {
+            'nombre_s': 'Usa un nombre breve y fácil de reconocer al reservar.',
+            'descripcion': 'Describe qué incluye el servicio.',
+            'categoria': 'Clasifica el servicio para facilitar su búsqueda.',
         }
         widgets = {
             'nombre_s': forms.TextInput(attrs={'class': 'admin-field'}),
@@ -114,6 +123,9 @@ class ServicioForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['categoria'].queryset = CategoriaServicio.objects.order_by(
+            'nombre'
+        )
         self.fields['personal'].queryset = Personal.objects.select_related(
             'id_rol'
         ).order_by('nombre')
@@ -295,22 +307,31 @@ class CategoriaServicioForm(forms.ModelForm):
 
 
 class ReservaForm(forms.ModelForm):
-    hora = forms.ChoiceField(choices=HORARIOS_DISPONIBLES)
+    hora = forms.ChoiceField(
+        choices=HORARIOS_DISPONIBLES,
+        label='Horario',
+        help_text='Solo se mostrarán horarios disponibles para el profesional.',
+        error_messages={'required': 'Selecciona un horario para la cita.'},
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
     nombre_cliente = forms.CharField(
         max_length=100,
         label='Ingrese su Nombre',
+        help_text='Nombre de la persona que asistirá a la cita.',
         error_messages={'required': 'Ingresa tu nombre.'},
         widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
     telefono_cliente = forms.CharField(
         max_length=20,
         label='Ingrese su Teléfono',
+        help_text='Lo usaremos para identificar tu reserva.',
         error_messages={'required': 'Ingresa tu teléfono.'},
         widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
     correo_cliente = forms.EmailField(
         max_length=100,
         label='Ingrese su Correo Electrónico',
+        help_text='Ingresa un correo válido para los datos de tu reserva.',
         error_messages={
             'required': 'Ingresa tu correo electrónico.',
             'invalid': 'Ingresa un correo electrónico válido.',
@@ -333,6 +354,15 @@ class ReservaForm(forms.ModelForm):
             'etiquetas': 'Etiquetas (opcional)',
         }
 
+        help_texts = {
+            'id_personal_servicio': (
+                'Cada opción muestra el servicio, el profesional, el precio '
+                'y la duración.'
+            ),
+            'fecha': 'Elige una fecha desde hoy en adelante.',
+            'etiquetas': 'Puedes seleccionar más de una etiqueta.',
+        }
+
         widgets = {
             'id_personal_servicio': forms.Select(attrs={
                 'class': 'form-control',
@@ -346,6 +376,7 @@ class ReservaForm(forms.ModelForm):
 
     def __init__(self, *args, cliente=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['fecha'].widget.attrs['min'] = timezone.localdate().isoformat()
         self.fields['id_personal_servicio'].queryset = (
             ServicioPersonal.objects.select_related(
                 'id_servicio',
@@ -367,7 +398,7 @@ class ReservaForm(forms.ModelForm):
         servicio = cleaned_data.get('id_personal_servicio')
         fecha = cleaned_data.get('fecha')
         hora = cleaned_data.get('hora')
-        if fecha and fecha < date.today():
+        if fecha and fecha < timezone.localdate():
             self.add_error('fecha', 'La fecha de la cita no puede estar en el pasado.')
         if (
             servicio

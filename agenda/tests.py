@@ -36,10 +36,11 @@ class ServicioAdminTests(TestCase):
         )
 
     def test_crear_servicio(self):
+        categoria = CategoriaServicio.objects.create(nombre='Cuidado de uñas')
         response = self.client.post(reverse('servicio_crear'), {
             'nombre_s': 'Manicure',
             'descripcion': 'Cuidado de uñas',
-            'categoria': '',
+            'categoria': categoria.pk,
             'personal': self.personal.pk,
             'duracion_aproximada': 45,
             'precio': '18000',
@@ -47,6 +48,7 @@ class ServicioAdminTests(TestCase):
 
         self.assertRedirects(response, reverse('servicios_admin'))
         servicio = Servicio.objects.get(nombre_s='Manicure')
+        self.assertEqual(servicio.categoria, categoria)
         asignacion = ServicioPersonal.objects.get(id_servicio=servicio)
         self.assertEqual(asignacion.id_personal, self.personal)
         self.assertEqual(asignacion.duracion_aproximada, 45)
@@ -62,8 +64,19 @@ class ServicioAdminTests(TestCase):
         self.assertContains(response, 'Profesional a cargo')
         self.assertContains(response, 'Duración aproximada (minutos)')
         self.assertContains(response, 'Precio (CLP)')
+        self.assertContains(response, 'Usa un nombre breve y fácil de reconocer al reservar.')
+        self.assertContains(response, 'Selecciona quién realizará este servicio.')
         self.assertContains(response, '¿No encuentras la categoría? Crear una nueva')
         self.assertContains(response, '¿No aparece el profesional? Crear uno nuevo')
+
+    def test_boton_agregar_servicio(self):
+        response = self.client.get(reverse('configuracion_admin'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'href="{reverse("servicio_crear")}"',
+        )
 
     def test_crear_profesional_guarda_datos_y_lo_hace_asignable(self):
         response = self.client.post(reverse('profesional_crear'), {
@@ -452,12 +465,31 @@ class ClienteReservaTests(TestCase):
         self.assertContains(response, 'Ese profesional ya tiene una cita en ese horario.')
         self.assertEqual(Reserva.objects.count(), 1)
 
+    def test_fecha_pasada_no_permitida(self):
+        fecha_pasada = timezone.localdate() - timedelta(days=1)
+        response = self.client.post(reverse('agendar_cita'), {
+            'id_personal_servicio': self.asignacion.pk,
+            'fecha': fecha_pasada.isoformat(),
+            'hora': '10:00',
+            'etiquetas': [self.etiqueta.pk],
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'La fecha de la cita no puede estar en el pasado.')
+        self.assertFalse(Reserva.objects.exists())
+
     def test_formulario_cliente_muestra_profesionales_y_etiquetas_disponibles(self):
         response = self.client.get(reverse('agendar_cita'))
 
         self.assertContains(response, 'Manicure - Profesional')
         self.assertContains(response, 'Primera visita')
         self.assertContains(response, 'type="checkbox"')
+        self.assertContains(response, 'Elige una fecha desde hoy en adelante.')
+        self.assertContains(response, 'Puedes seleccionar más de una etiqueta.')
+        self.assertContains(
+            response,
+            f'min="{timezone.localdate().isoformat()}"',
+        )
 
 
 class AdminLiveDataTests(TestCase):
