@@ -5,7 +5,13 @@ from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import *
 from django.contrib import messages
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Count, Max, Min, Q
 from django.db import transaction
@@ -700,13 +706,30 @@ def login_cliente(request):
 def registro_cliente(request):
     return redirect('login_cliente')
 
+@user_passes_test(es_cliente, login_url='login_cliente')
 def mi_cuenta(request):
     cliente = get_object_or_404(Cliente, usuario=request.user)
     if request.method == 'POST':
+        telefono_anterior = cliente.telefono
         form = ClienteUpdateForm(request.POST, instance=cliente)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Datos actualizados correctamente')
+            cliente_actualizado = form.save(commit=False)
+            telefono_nuevo = cliente_actualizado.telefono.strip()
+            cliente_actualizado.telefono = telefono_nuevo
+            cliente_actualizado.save()
+
+            if cliente.usuario:
+                cliente.usuario.set_password(telefono_nuevo)
+                cliente.usuario.save(update_fields=['password'])
+                update_session_auth_hash(request, cliente.usuario)
+
+            if telefono_nuevo != telefono_anterior:
+                messages.success(
+                    request,
+                    'Datos actualizados correctamente. Tu teléfono y contraseña de acceso se han actualizado.',
+                )
+            else:
+                messages.success(request, 'Datos actualizados correctamente.')
             return redirect('mi_cuenta')
     else:
         form = ClienteUpdateForm(instance=cliente)

@@ -465,6 +465,42 @@ class ClienteReservaTests(TestCase):
         self.assertEqual(response.context['q'], '')
         self.assertContains(response, 'value=""')
 
+    def test_cuenta_cliente_puede_cambiar_telefono_y_actualizar_contrasena(self):
+        response = self.client.post(reverse('mi_cuenta'), {
+            'nombre_c': 'Cliente de reserva',
+            'telefono': '+56999998888',
+            'correo': 'cliente@example.com',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('mi_cuenta'))
+        self.cliente.refresh_from_db()
+        self.assertEqual(self.cliente.telefono, '+56999998888')
+        self.assertTrue(self.cliente.usuario.check_password('+56999998888'))
+        response_cuenta = self.client.get(reverse('mi_cuenta'))
+        self.assertContains(
+            response_cuenta,
+            'Tu teléfono y contraseña de acceso se han actualizado.',
+        )
+
+        self.client.logout()
+        login_response = self.client.post(reverse('login_cliente'), {
+            'nombre': 'Cliente de reserva',
+            'password': '+56999998888',
+        })
+
+        self.assertRedirects(login_response, reverse('agendar_cita'))
+
+    def test_mi_cuenta_requiere_sesion_de_cliente(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('mi_cuenta'))
+
+        self.assertRedirects(
+            response,
+            f'{reverse("login_cliente")}?next={reverse("mi_cuenta")}',
+        )
+
     def test_cliente_sin_cuenta_se_crea_automaticamente_al_reservar(self):
         self.client.logout()
         response = self.client.post(reverse('agendar_cita'), {

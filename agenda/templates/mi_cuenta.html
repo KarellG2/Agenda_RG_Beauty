@@ -17,12 +17,13 @@
 
     <section class="cliente-panel reserva-panel" aria-labelledby="cuenta-title">
         <h2 id="cuenta-title">Datos Personales</h2>
-        <form class="reserva-form" method="post">
+        <p class="text-muted">Tu teléfono funciona como contraseña de acceso. Si lo cambias, también cambiará la contraseña con la que inicias sesión.</p>
+        <form class="reserva-form mi-cuenta-form" method="post">
             {% csrf_token %}
             {% if form.non_field_errors %}
                 <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
             {% endif %}
-            
+
             {% for field in form %}
                 <div class="campo-formulario">
                     {{ field.label_tag }}
@@ -31,7 +32,7 @@
                     {{ field.errors }}
                 </div>
             {% endfor %}
-            
+
             <div class="reserva-form-actions">
                 <button type="submit" class="primary-btn">Guardar cambios</button>
             </div>
