@@ -464,3 +464,29 @@ class AutenticacionClienteForm(forms.Form):
             'class': 'form-control',
         }),
     )
+
+class ClienteUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nombre_c', 'telefono', 'correo']
+        labels = {
+            'nombre_c': 'Nombre',
+            'telefono': 'Teléfono',
+            'correo': 'Correo electrónico',
+        }
+        widgets = {
+            'nombre_c': forms.TextInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'correo': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+        
+    def clean_correo(self):
+        correo = self.cleaned_data['correo'].strip().lower()
+        if Cliente.objects.filter(correo__iexact=correo).exclude(pk=self.instance.pk).exists():
+            raise ValidationError('Este correo ya está en uso')
+        return correo
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono').strip()
+        if Cliente.objects.filter(telefono=telefono).exclude(pk=self.instance.pk).exists():
+            raise ValidationError('Este teléfono ya está en uso')
+        return telefono

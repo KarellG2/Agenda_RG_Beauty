@@ -1,0 +1,41 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Mi Cuenta | RG Beauty{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'paginas-cliente.css' %}">
+<link rel="stylesheet" href="{% static 'agendar-cliente.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cliente-page">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Tu perfil</p>
+        <h1>Mi Cuenta</h1>
+        <p>Actualiza tus datos de contacto.</p>
+    </header>
+
+    <section class="cliente-panel reserva-panel" aria-labelledby="cuenta-title">
+        <h2 id="cuenta-title">Datos Personales</h2>
+        <form class="reserva-form" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            
+            {% for field in form %}
+                <div class="campo-formulario">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            
+            <div class="reserva-form-actions">
+                <button type="submit" class="primary-btn">Guardar cambios</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

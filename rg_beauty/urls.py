@@ -49,5 +49,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('login_cliente/', views.login_cliente, name='login_cliente'),
     path('registro_cliente/', views.registro_cliente, name='registro_cliente'),
+    path('mi_cuenta/', views.mi_cuenta, name='mi_cuenta'),
 
 ]

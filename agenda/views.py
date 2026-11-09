@@ -699,3 +699,15 @@ def login_cliente(request):
 
 def registro_cliente(request):
     return redirect('login_cliente')
+
+def mi_cuenta(request):
+    cliente = get_object_or_404(Cliente, usuario=request.user)
+    if request.method == 'POST':
+        form = ClienteUpdateForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Datos actualizados correctamente')
+            return redirect('mi_cuenta')
+    else:
+        form = ClienteUpdateForm(instance=cliente)
+    return render(request, 'mi_cuenta.html', {'form': form, 'cliente': cliente})
