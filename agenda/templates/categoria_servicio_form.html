@@ -1,0 +1,42 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Crear categoría | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="servicios" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <section aria-labelledby="category-form-title">
+        <h1 class="admin-section-title" id="category-form-title">Crear categoría</h1>
+        <p class="admin-section-description">
+            Define un nombre para agrupar servicios. La descripción es opcional.
+        </p>
+
+        <form method="post" class="service-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <ul class="service-form-errors">{{ form.non_field_errors }}</ul>
+            {% endif %}
+            {% for field in form %}
+                <div class="service-form-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="service-form-actions">
+                <button class="primary-btn" type="submit">Crear categoría</button>
+                <a class="btn-outline" href="{% url 'servicio_crear' %}">Volver a crear servicio</a>
+                <a class="btn-outline" href="{% url 'servicios_admin' %}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

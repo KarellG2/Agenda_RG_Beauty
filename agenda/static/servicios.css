@@ -31,6 +31,43 @@
     margin-bottom: 8px;
 }
 
+.service-item .service-assignment {
+    margin-bottom: 6px;
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.tag-color-input {
+    width: 72px;
+    min-height: 42px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.admin-tag-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.admin-tag-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-tag-swatch {
+    display: inline-block;
+    border: 1px solid color-mix(in srgb, var(--tag-color) 60%, #777);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--tag-color) 22%, white);
+}
+
+.admin-tag-swatch {
+    width: 18px;
+    height: 18px;
+}
+
 .service-actions,
 .service-form-actions {
     display: flex;
@@ -63,6 +100,18 @@
 .service-form-field label {
     color: #624d56;
     font: 500 0.82rem/1.3 "Segoe UI", sans-serif;
+}
+
+.service-category-create {
+    width: fit-content;
+    color: var(--button);
+    font: 600 0.8rem "Segoe UI", sans-serif;
+    text-underline-offset: 3px;
+}
+
+.service-form-field small {
+    color: var(--muted);
+    font: 0.78rem/1.4 "Segoe UI", sans-serif;
 }
 
 .service-form-field .errorlist,

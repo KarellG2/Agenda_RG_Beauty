@@ -17,7 +17,9 @@
                 <li><a class="{% if active_page == 'dashboard' %}is-active{% endif %}" href="{% url 'vista_administracion' %}">Dashboard</a></li>
                 <li><a class="{% if active_page == 'agenda' %}is-active{% endif %}" href="{% url 'agendar_cita_admin' %}">Agenda</a></li>
                 <li><a class="{% if active_page == 'clientes' %}is-active{% endif %}" href="{% url 'clientes_admin' %}">Clientes</a></li>
+                <li><a class="{% if active_page == 'profesionales' %}is-active{% endif %}" href="{% url 'profesionales_admin' %}">Profesionales</a></li>
                 <li><a class="{% if active_page == 'servicios' %}is-active{% endif %}" href="{% url 'servicios_admin' %}">Servicios</a></li>
+                <li><a class="{% if active_page == 'etiquetas' %}is-active{% endif %}" href="{% url 'etiquetas_admin' %}">Etiquetas</a></li>
                 <li><a class="{% if active_page == 'notificaciones' %}is-active{% endif %}" href="{% url 'notificaciones_admin' %}">Notificaciones</a></li>
                 <li><a class="{% if active_page == 'auditoria' %}is-active{% endif %}" href="{% url 'auditoria_admin' %}">Auditoría</a></li>
                 <li><a class="{% if active_page == 'configuracion' %}is-active{% endif %}" href="{% url 'configuracion_admin' %}">Configuración</a></li>

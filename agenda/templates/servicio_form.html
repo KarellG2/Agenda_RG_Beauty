@@ -1,0 +1,52 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="servicios" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <section aria-labelledby="service-form-title">
+        <h1 class="admin-section-title" id="service-form-title">{{ titulo }}</h1>
+        <p class="admin-section-description">
+            Define el servicio, asígnalo a un profesional e indica su duración y precio.
+        </p>
+
+        <form method="post" class="service-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <ul class="service-form-errors">{{ form.non_field_errors }}</ul>
+            {% endif %}
+            {% for field in form %}
+                <div class="service-form-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.name == "categoria" and not servicio %}
+                        <a class="service-category-create" href="{% url 'categoria_servicio_crear' %}">
+                            ¿No encuentras la categoría? Crear una nueva
+                        </a>
+                    {% endif %}
+                    {% if field.name == "personal" and not servicio %}
+                        <a class="service-category-create" href="{% url 'profesional_crear' %}">
+                            ¿No aparece el profesional? Crear uno nuevo
+                        </a>
+                    {% endif %}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="service-form-actions">
+                <button class="primary-btn" type="submit">{{ accion }}</button>
+                <a class="btn-outline" href="{% url 'servicios_admin' %}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

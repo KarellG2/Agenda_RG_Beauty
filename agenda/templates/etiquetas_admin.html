@@ -1,0 +1,53 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Etiquetas de citas | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="etiquetas" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <section aria-labelledby="tags-title">
+        <h1 class="admin-section-title" id="tags-title">Etiquetas de citas</h1>
+        <p class="admin-section-description">
+            Crea etiquetas que los clientes podrán seleccionar al reservar una cita.
+        </p>
+
+        <form method="post" class="service-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <ul class="service-form-errors">{{ form.non_field_errors }}</ul>
+            {% endif %}
+            {% for field in form %}
+                <div class="service-form-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="service-form-actions">
+                <button class="primary-btn" type="submit">Crear etiqueta</button>
+            </div>
+        </form>
+
+        <section class="admin-tag-list" aria-label="Etiquetas disponibles">
+            <h2>Etiquetas disponibles</h2>
+            {% for etiqueta in etiquetas %}
+                <div class="admin-card admin-tag-item">
+                    <span class="admin-tag-swatch" style="--tag-color: {{ etiqueta.color }}" aria-hidden="true"></span>
+                    <span>{{ etiqueta.nombre }}</span>
+                    <code>{{ etiqueta.color }}</code>
+                </div>
+            {% empty %}
+                <p>Aún no hay etiquetas. Crea una para que aparezca en el formulario de reserva.</p>
+            {% endfor %}
+        </section>
+    </section>
+</div>
+{% endblock %}

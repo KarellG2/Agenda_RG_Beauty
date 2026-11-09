@@ -30,12 +30,11 @@
 
             <article class="auth-role">
                 <h2>¿Eres cliente?</h2>
-                <p>Ingresa con tu correo y contraseña para consultar tus reservas.</p>
+                <p>Ingresa con tu nombre y usa tu teléfono como contraseña para consultar tus reservas.</p>
                 <a class="agenda-button" href="{% url 'login_cliente' %}">Inicia sesión aquí</a>
             </article>
         </div>
-
-        <p class="auth-footer">¿Aún no tienes cuenta? <a href="{% url 'registro_cliente' %}">Crea tu cuenta</a></p>
+        <p class="auth-footer">¿Primera vez? <a href="{% url 'agendar_cita' %}">Agenda una cita y tu cuenta se creará automáticamente.</a></p>
     </section>
 </div>
 {% endblock %}

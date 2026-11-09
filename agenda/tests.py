@@ -1,12 +1,17 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import (
     Cliente,
     CategoriaServicio,
+    Etiqueta,
     Personal,
+    Reserva,
     Rol,
     Servicio,
     ServicioPersonal,
@@ -22,16 +27,167 @@ class ServicioAdminTests(TestCase):
             is_staff=True,
         )
         self.client.force_login(self.admin)
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        self.personal = Personal.objects.create(
+            nombre='Profesional a cargo',
+            credenciales='',
+            años_experiencia=3,
+            id_rol=rol,
+        )
 
     def test_crear_servicio(self):
         response = self.client.post(reverse('servicio_crear'), {
             'nombre_s': 'Manicure',
             'descripcion': 'Cuidado de uñas',
             'categoria': '',
+            'personal': self.personal.pk,
+            'duracion_aproximada': 45,
+            'precio': '18000',
         })
 
         self.assertRedirects(response, reverse('servicios_admin'))
-        self.assertTrue(Servicio.objects.filter(nombre_s='Manicure').exists())
+        servicio = Servicio.objects.get(nombre_s='Manicure')
+        asignacion = ServicioPersonal.objects.get(id_servicio=servicio)
+        self.assertEqual(asignacion.id_personal, self.personal)
+        self.assertEqual(asignacion.duracion_aproximada, 45)
+        self.assertEqual(asignacion.precio, 18000)
+
+    def test_formulario_creacion_muestra_campos_y_es_espanol(self):
+        response = self.client.get(reverse('servicio_crear'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Nombre del servicio')
+        self.assertContains(response, 'Descripción')
+        self.assertContains(response, 'Categoría')
+        self.assertContains(response, 'Profesional a cargo')
+        self.assertContains(response, 'Duración aproximada (minutos)')
+        self.assertContains(response, 'Precio (CLP)')
+        self.assertContains(response, '¿No encuentras la categoría? Crear una nueva')
+        self.assertContains(response, '¿No aparece el profesional? Crear uno nuevo')
+
+    def test_crear_profesional_guarda_datos_y_lo_hace_asignable(self):
+        response = self.client.post(reverse('profesional_crear'), {
+            'nombre': 'Nueva profesional',
+            'credenciales': 'Técnica en uñas',
+            'años_experiencia': 4,
+            'id_rol': self.personal.id_rol_id,
+        })
+
+        self.assertRedirects(response, reverse('servicio_crear'))
+        profesional = Personal.objects.get(nombre='Nueva profesional')
+        self.assertEqual(profesional.credenciales, 'Técnica en uñas')
+        self.assertEqual(profesional.años_experiencia, 4)
+        formulario_servicio = self.client.get(reverse('servicio_crear'))
+        self.assertContains(formulario_servicio, 'Nueva profesional')
+
+    def test_crear_rol_permite_luego_crear_profesional_con_ese_rol(self):
+        response_rol = self.client.post(reverse('rol_crear'), {
+            'nombre_rol': 'Cosmetóloga',
+            'descripcion': 'Especialista en tratamientos faciales.',
+        })
+
+        self.assertRedirects(response_rol, reverse('profesional_crear'))
+        rol = Rol.objects.get(nombre_rol='Cosmetóloga')
+        response_profesional = self.client.post(reverse('profesional_crear'), {
+            'nombre': 'Ana Profesional',
+            'credenciales': 'Certificación en cosmetología',
+            'años_experiencia': 2,
+            'id_rol': rol.pk,
+        })
+
+        self.assertRedirects(response_profesional, reverse('servicio_crear'))
+        self.assertEqual(
+            Personal.objects.get(nombre='Ana Profesional').id_rol,
+            rol,
+        )
+
+    def test_no_crear_profesional_sin_campos_requeridos(self):
+        response = self.client.post(reverse('profesional_crear'), {
+            'nombre': '',
+            'credenciales': '',
+            'años_experiencia': '',
+            'id_rol': '',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ingresa el nombre del profesional.')
+        self.assertContains(response, 'Selecciona un cargo o especialidad.')
+        self.assertFalse(Personal.objects.filter(nombre='').exists())
+
+    def test_lista_de_profesionales_es_visible_en_administracion(self):
+        response = self.client.get(reverse('profesionales_admin'))
+
+        self.assertContains(response, 'Profesionales')
+        self.assertContains(response, 'Profesional a cargo')
+        self.assertContains(response, 'Crear profesional')
+
+    def test_crear_servicio_sin_asignacion_no_lo_guarda(self):
+        response = self.client.post(reverse('servicio_crear'), {
+            'nombre_s': 'Manicure',
+            'descripcion': 'Cuidado de uñas',
+            'categoria': '',
+            'personal': '',
+            'duracion_aproximada': '',
+            'precio': '',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Selecciona al profesional a cargo.')
+        self.assertFalse(Servicio.objects.exists())
+
+    def test_crear_categoria_guarda_nombre_y_descripcion(self):
+        response = self.client.post(reverse('categoria_servicio_crear'), {
+            'nombre': 'Cuidado facial',
+            'descripcion': 'Tratamientos para el rostro.',
+        })
+
+        self.assertRedirects(response, reverse('servicio_crear'))
+        categoria = CategoriaServicio.objects.get(nombre='Cuidado facial')
+        self.assertEqual(categoria.descripcion, 'Tratamientos para el rostro.')
+        formulario_servicio = self.client.get(reverse('servicio_crear'))
+        self.assertContains(formulario_servicio, 'Cuidado facial')
+
+    def test_descripcion_de_categoria_es_opcional(self):
+        response = self.client.post(reverse('categoria_servicio_crear'), {
+            'nombre': 'Masajes',
+            'descripcion': '',
+        })
+
+        self.assertRedirects(response, reverse('servicio_crear'))
+        self.assertEqual(CategoriaServicio.objects.get().descripcion, '')
+
+    def test_no_crear_categoria_sin_nombre_o_con_nombre_duplicado(self):
+        CategoriaServicio.objects.create(nombre='Cuidado facial')
+
+        response_vacia = self.client.post(reverse('categoria_servicio_crear'), {
+            'nombre': ' ',
+            'descripcion': '',
+        })
+        response_duplicada = self.client.post(reverse('categoria_servicio_crear'), {
+            'nombre': 'CUIDADO FACIAL',
+            'descripcion': '',
+        })
+
+        self.assertEqual(response_vacia.status_code, 200)
+        self.assertContains(response_vacia, 'Ingresa el nombre de la categoría.')
+        self.assertEqual(response_duplicada.status_code, 200)
+        self.assertContains(response_duplicada, 'Ya existe una categoría con ese nombre.')
+        self.assertEqual(CategoriaServicio.objects.count(), 1)
+
+    def test_no_crear_servicio_sin_nombre_o_descripcion(self):
+        response = self.client.post(reverse('servicio_crear'), {
+            'nombre_s': '   ',
+            'descripcion': '',
+            'categoria': '',
+            'personal': self.personal.pk,
+            'duracion_aproximada': 45,
+            'precio': '18000',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ingresa el nombre del servicio.')
+        self.assertContains(response, 'Ingresa una descripción del servicio.')
+        self.assertFalse(Servicio.objects.exists())
 
     def test_editar_servicio(self):
         servicio = Servicio.objects.create(
@@ -43,12 +199,63 @@ class ServicioAdminTests(TestCase):
             'nombre_s': 'Manicure permanente',
             'descripcion': 'Descripción actualizada',
             'categoria': '',
+            'personal': self.personal.pk,
+            'duracion_aproximada': 50,
+            'precio': '20000',
         })
 
         self.assertRedirects(response, reverse('servicios_admin'))
         servicio.refresh_from_db()
         self.assertEqual(servicio.nombre_s, 'Manicure permanente')
         self.assertEqual(servicio.descripcion, 'Descripción actualizada')
+        asignacion = ServicioPersonal.objects.get(id_servicio=servicio)
+        self.assertEqual(asignacion.duracion_aproximada, 50)
+        self.assertEqual(asignacion.precio, 20000)
+
+    def test_editar_servicio_asigna_categoria(self):
+        categoria = CategoriaServicio.objects.create(nombre='Uñas')
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure',
+            descripcion='Cuidado de uñas',
+        )
+
+        response = self.client.post(
+            reverse('servicio_editar', args=[servicio.pk]),
+            {
+                'nombre_s': 'Manicure',
+                'descripcion': 'Cuidado de uñas',
+                'categoria': categoria.pk,
+                'personal': self.personal.pk,
+                'duracion_aproximada': 45,
+                'precio': '18000',
+            },
+        )
+
+        self.assertRedirects(response, reverse('servicios_admin'))
+        servicio.refresh_from_db()
+        self.assertEqual(servicio.categoria, categoria)
+
+    def test_crear_etiqueta_la_hace_disponible_para_reservas(self):
+        response = self.client.post(reverse('etiquetas_admin'), {
+            'nombre': 'Primera visita',
+            'color': '#D9C7CC',
+        })
+
+        self.assertRedirects(response, reverse('etiquetas_admin'))
+        self.assertTrue(Etiqueta.objects.filter(nombre='Primera visita').exists())
+        self.assertContains(self.client.get(reverse('etiquetas_admin')), 'Primera visita')
+
+    def test_no_crear_etiqueta_con_nombre_duplicado(self):
+        Etiqueta.objects.create(nombre='Primera visita')
+
+        response = self.client.post(reverse('etiquetas_admin'), {
+            'nombre': 'primera visita',
+            'color': '#D9C7CC',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ya existe una etiqueta con ese nombre.')
+        self.assertEqual(Etiqueta.objects.count(), 1)
 
     def test_eliminar_servicio_sin_asignaciones(self):
         servicio = Servicio.objects.create(
@@ -103,6 +310,248 @@ class ServicioAdminTests(TestCase):
         self.assertContains(response, 'Uñas')
         self.assertContains(response, 'Precio pendiente de asignar')
 
+    def test_listado_muestra_precio_asignado_a_profesional(self):
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        personal = Personal.objects.create(
+            nombre='Profesional',
+            credenciales='',
+            años_experiencia=1,
+            id_rol=rol,
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure',
+            descripcion='Cuidado de uñas',
+        )
+        ServicioPersonal.objects.create(
+            id_personal=personal,
+            id_servicio=servicio,
+            duracion_aproximada=30,
+            precio=18000,
+        )
+
+        response = self.client.get(reverse('servicios_admin'))
+
+        self.assertContains(response, '$18000 CLP')
+
+    def test_eliminar_servicio_solo_acepta_post(self):
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure',
+            descripcion='Cuidado de uñas',
+        )
+
+        response = self.client.get(
+            reverse('servicio_eliminar', args=[servicio.pk]),
+        )
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Servicio.objects.filter(pk=servicio.pk).exists())
+
+    def test_gestion_de_servicios_requiere_sesion_de_administrador(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('servicio_crear'))
+
+        self.assertRedirects(
+            response,
+            f'{reverse("login")}?next={reverse("servicio_crear")}',
+        )
+
+
+class ClienteReservaTests(TestCase):
+    def setUp(self):
+        user = get_user_model().objects.create_user(
+            username='cliente@example.com',
+            email='cliente@example.com',
+            password='test-password',
+        )
+        self.cliente = Cliente.objects.create(
+            nombre_c='Cliente de reserva',
+            telefono='+56912345678',
+            correo='cliente@example.com',
+            usuario=user,
+        )
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        personal = Personal.objects.create(
+            nombre='Profesional',
+            credenciales='',
+            años_experiencia=2,
+            id_rol=rol,
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure',
+            descripcion='Cuidado de uñas',
+        )
+        self.asignacion = ServicioPersonal.objects.create(
+            id_personal=personal,
+            id_servicio=servicio,
+            duracion_aproximada=45,
+            precio=18000,
+        )
+        self.etiqueta = Etiqueta.objects.create(
+            nombre='Primera visita',
+            color='#D9C7CC',
+        )
+        self.client.force_login(user)
+
+    def test_cliente_puede_reservar_servicio_y_guardar_etiquetas(self):
+        response = self.client.post(reverse('agendar_cita'), {
+            'id_personal_servicio': self.asignacion.pk,
+            'fecha': '2027-01-15',
+            'hora': '10:00',
+            'etiquetas': [self.etiqueta.pk],
+        })
+
+        reserva = Reserva.objects.get()
+        self.assertRedirects(response, reverse('ver_citas_cliente'))
+        self.assertEqual(reserva.id_cliente, self.cliente)
+        self.assertEqual(reserva.id_personal_servicio, self.asignacion)
+        self.assertEqual(reserva.id_personal, self.asignacion.id_personal)
+        self.assertEqual(list(reserva.etiquetas.all()), [self.etiqueta])
+        self.assertContains(
+            self.client.get(reverse('ver_citas_cliente')),
+            'Primera visita',
+        )
+
+    def test_cliente_sin_cuenta_se_crea_automaticamente_al_reservar(self):
+        self.client.logout()
+        response = self.client.post(reverse('agendar_cita'), {
+            'id_personal_servicio': self.asignacion.pk,
+            'nombre_cliente': 'Cliente generado',
+            'telefono_cliente': '+56987654321',
+            'correo_cliente': 'generado@example.com',
+            'fecha': '2027-01-15',
+            'hora': '10:00',
+            'etiquetas': [self.etiqueta.pk],
+        })
+
+        cliente = Cliente.objects.get(correo='generado@example.com')
+        reserva = Reserva.objects.get(id_cliente=cliente)
+        self.assertRedirects(response, reverse('ver_citas_cliente'))
+        self.assertEqual(cliente.nombre_c, 'Cliente generado')
+        self.assertEqual(cliente.telefono, '+56987654321')
+        self.assertEqual(reserva.id_personal_servicio, self.asignacion)
+        self.assertEqual(list(reserva.etiquetas.all()), [self.etiqueta])
+
+    def test_cliente_no_puede_reservar_horario_ya_ocupado(self):
+        fecha_cita = timezone.localdate() + timedelta(days=1)
+        Reserva.objects.create(
+            id_cliente=self.cliente,
+            id_personal_servicio=self.asignacion,
+            id_personal=self.asignacion.id_personal,
+            fecha=fecha_cita,
+            hora='09:00',
+        )
+        response = self.client.post(reverse('agendar_cita'), {
+            'id_personal_servicio': self.asignacion.pk,
+            'fecha': fecha_cita.isoformat(),
+            'hora': '09:00',
+            'etiquetas': [self.etiqueta.pk],
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ese profesional ya tiene una cita en ese horario.')
+        self.assertEqual(Reserva.objects.count(), 1)
+
+    def test_formulario_cliente_muestra_profesionales_y_etiquetas_disponibles(self):
+        response = self.client.get(reverse('agendar_cita'))
+
+        self.assertContains(response, 'Manicure - Profesional')
+        self.assertContains(response, 'Primera visita')
+        self.assertContains(response, 'type="checkbox"')
+
+
+class AdminLiveDataTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_user(
+            username='administradora',
+            password='test-password',
+            is_staff=True,
+        )
+        self.client.force_login(self.admin)
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        self.personal = Personal.objects.create(
+            nombre='Profesional real',
+            credenciales='Certificación',
+            años_experiencia=5,
+            id_rol=rol,
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Servicio real',
+            descripcion='Servicio para prueba',
+        )
+        asignacion = ServicioPersonal.objects.create(
+            id_personal=self.personal,
+            id_servicio=servicio,
+            duracion_aproximada=60,
+            precio=25000,
+        )
+        self.cliente = Cliente.objects.create(
+            nombre_c='Cliente real',
+            telefono='+56911112222',
+            correo='real@example.com',
+        )
+        self.reserva = Reserva.objects.create(
+            id_cliente=self.cliente,
+            id_personal=self.personal,
+            id_personal_servicio=asignacion,
+            fecha=timezone.localdate(),
+            hora='09:00',
+            estado='confirmado',
+        )
+
+    def test_dashboard_muestra_metricas_calculadas_de_la_base(self):
+        response = self.client.get(reverse('vista_administracion'))
+
+        self.assertContains(response, 'Citas de hoy')
+        self.assertContains(response, 'Clientes registrados')
+        self.assertContains(response, 'Profesionales')
+        self.assertContains(response, 'Servicios')
+        self.assertContains(response, '1')
+        self.assertNotContains(response, 'DATOS DE DEMOSTRACIÓN')
+        self.assertNotContains(response, '68 %')
+        self.assertNotContains(response, '4,5 h')
+
+    def test_admin_agenda_muestra_citas_y_servicios_reales(self):
+        response = self.client.get(reverse('agendar_cita_admin'))
+
+        self.assertContains(response, 'Cliente real')
+        self.assertContains(response, 'Servicio real')
+        self.assertContains(response, 'Profesional real')
+        self.assertNotContains(response, 'Registrar una cita manualmente')
+
+    def test_agenda_admin_no_incluye_formulario_para_crear_clientes(self):
+        response = self.client.get(reverse('agendar_cita_admin'))
+
+        self.assertNotContains(response, 'Registrar una cita manualmente')
+        self.assertNotContains(response, 'Nombre del cliente')
+        self.assertContains(response, 'Cliente real')
+
+    def test_clientes_usa_mismo_formato_de_tarjetas_que_profesionales(self):
+        response = self.client.get(reverse('clientes_admin'))
+
+        self.assertContains(response, 'class="services-grid"')
+        self.assertContains(response, 'class="admin-card service-item"')
+        self.assertContains(response, 'Cliente real')
+        self.assertContains(response, '1 reserva')
+
+    def test_busqueda_de_clientes_acepta_telefono(self):
+        response = self.client.get(
+            reverse('clientes_admin'),
+            {'q': '11112222'},
+        )
+
+        self.assertContains(response, 'Cliente real')
+
+    def test_dashboard_actualiza_contadores_al_guardar_cancelacion(self):
+        self.reserva.estado = 'cancelado'
+        self.reserva.save(update_fields=['estado'])
+
+        response = self.client.get(reverse('vista_administracion'))
+
+        self.assertEqual(response.context['canceladas'], 1)
+        self.assertEqual(response.context['tasa_cancelacion'], 100.0)
+        self.assertEqual(response.context['citas_hoy'], 1)
+
 
 class AdminLoginRedirectTests(TestCase):
     def setUp(self):
@@ -153,6 +602,8 @@ class AdminLoginRedirectTests(TestCase):
         self.assertNotIn('Agendar cita', header)
         self.assertNotIn('Ver citas', header)
         self.assertNotIn('Crear cuenta', header)
+        self.assertContains(response, '¿Quieres agendar una cita?')
+        self.assertContains(response, f'href="{reverse("agendar_cita")}"')
 
     def test_pagina_de_acceso_ofrece_login_admin_cliente_y_registro(self):
         response = self.client.get(reverse('acceso'))
@@ -161,7 +612,8 @@ class AdminLoginRedirectTests(TestCase):
         self.assertContains(response, '¿Eres cliente?')
         self.assertContains(response, reverse('login'))
         self.assertContains(response, reverse('login_cliente'))
-        self.assertContains(response, reverse('registro_cliente'))
+        self.assertContains(response, 'Agenda una cita y tu cuenta se creará automáticamente.')
+        self.assertNotContains(response, 'Crea tu cuenta')
 
     def test_dashboard_usa_navegacion_admin_compartida(self):
         self.client.force_login(self.admin)
@@ -193,108 +645,133 @@ class AdminLoginRedirectTests(TestCase):
 
 
 class ClienteAccountTests(TestCase):
-    registration_data = {
-        'nombre': 'Cliente de prueba',
-        'telefono': '+56912345678',
-        'correo': 'cliente@example.com',
-        'password1': 'Cliente-segura-2026!',
-        'password2': 'Cliente-segura-2026!',
-    }
-
-    def test_registro_guarda_cuenta_y_cliente_vinculados(self):
-        response = self.client.post(
-            reverse('registro_cliente'),
-            self.registration_data,
+    def setUp(self):
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        personal = Personal.objects.create(
+            nombre='Profesional',
+            credenciales='Certificación',
+            años_experiencia=3,
+            id_rol=rol,
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure',
+            descripcion='Cuidado de uñas',
+        )
+        self.asignacion = ServicioPersonal.objects.create(
+            id_personal=personal,
+            id_servicio=servicio,
+            duracion_aproximada=45,
+            precio=18000,
         )
 
-        self.assertRedirects(response, reverse('agendar_cita'))
-        user = get_user_model().objects.get(username='cliente@example.com')
+    def reservar(self, **overrides):
+        data = {
+            'id_personal_servicio': self.asignacion.pk,
+            'nombre_cliente': 'Cliente de prueba',
+            'telefono_cliente': '+56912345678',
+            'correo_cliente': 'cliente@example.com',
+            'fecha': '2027-01-15',
+            'hora': '10:00',
+        }
+        data.update(overrides)
+        return self.client.post(reverse('agendar_cita'), data)
+
+    def test_reserva_crea_cuenta_cliente_y_deja_sesion_iniciada(self):
+        response = self.reservar()
+
         cliente = Cliente.objects.get(correo='cliente@example.com')
-        self.assertEqual(cliente.usuario, user)
-        self.assertTrue(user.check_password(self.registration_data['password1']))
-        self.assertNotEqual(user.password, self.registration_data['password1'])
-        self.assertEqual(str(self.client.session['_auth_user_id']), str(user.pk))
-        self.assertEqual(response.url, reverse('agendar_cita'))
-
-    def test_correo_duplicado_no_crea_otra_cuenta(self):
-        self.client.post(reverse('registro_cliente'), self.registration_data)
-        self.client.logout()
-
-        response = self.client.post(
-            reverse('registro_cliente'),
-            self.registration_data,
+        user = cliente.usuario
+        self.assertRedirects(response, reverse('ver_citas_cliente'))
+        self.assertEqual(cliente.telefono, '+56912345678')
+        self.assertTrue(user.check_password('+56912345678'))
+        self.assertEqual(
+            str(self.client.session['_auth_user_id']),
+            str(user.pk),
         )
+        self.assertEqual(Reserva.objects.get().id_cliente, cliente)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Ya existe una cuenta con este correo.')
-        self.assertEqual(Cliente.objects.filter(correo='cliente@example.com').count(), 1)
-
-    def test_registro_vincula_perfil_preexistente_con_datos_coincidentes(self):
-        cliente_existente = Cliente.objects.create(
-            nombre_c=self.registration_data['nombre'],
-            telefono=self.registration_data['telefono'],
-            correo=self.registration_data['correo'],
-        )
-
-        response = self.client.post(
-            reverse('registro_cliente'),
-            self.registration_data,
-        )
-
-        self.assertRedirects(response, reverse('agendar_cita'))
-        cliente_existente.refresh_from_db()
-        self.assertIsNotNone(cliente_existente.usuario_id)
-        self.assertEqual(Cliente.objects.filter(correo='cliente@example.com').count(), 1)
-
-    def test_cliente_registrado_aparece_en_listado_admin(self):
-        self.client.post(reverse('registro_cliente'), self.registration_data)
-        admin = get_user_model().objects.create_user(
-            username='administradora',
-            password='test-password',
-            is_staff=True,
-        )
-        self.client.force_login(admin)
-
-        response = self.client.get(reverse('clientes_admin'))
-
-        self.assertContains(response, 'Cliente de prueba')
-        self.assertContains(response, 'cliente@example.com')
-        self.assertContains(response, 'Cuenta registrada')
-
-    def test_login_cliente_usa_correo_y_contrasena(self):
-        self.client.post(reverse('registro_cliente'), self.registration_data)
+    def test_cliente_puede_iniciar_sesion_con_nombre_y_telefono_como_clave(self):
+        self.reservar()
         self.client.logout()
 
         response = self.client.post(reverse('login_cliente'), {
-            'correo': self.registration_data['correo'],
-            'password': self.registration_data['password1'],
+            'nombre': 'Cliente de prueba',
+            'password': '+56912345678',
         })
 
         self.assertRedirects(response, reverse('agendar_cita'))
         self.assertTrue(self.client.session.get('_auth_user_id'))
 
+    def test_login_con_nombre_repetido_valida_el_telefono_de_la_cuenta(self):
+        self.reservar()
+        self.client.logout()
+        usuario = get_user_model().objects.create_user(
+            username='cliente-duplicado',
+            password='223344',
+        )
+        Cliente.objects.create(
+            nombre_c='Cliente de prueba',
+            telefono='223344',
+            correo='duplicado@example.com',
+            usuario=usuario,
+        )
+
+        response = self.client.post(reverse('login_cliente'), {
+            'nombre': 'Cliente de prueba',
+            'password': '223344',
+        })
+
+        self.assertRedirects(response, reverse('agendar_cita'))
+        self.assertEqual(
+            str(self.client.session['_auth_user_id']),
+            str(usuario.pk),
+        )
+
+    def test_reserva_reutiliza_perfil_existente_y_lo_vincula_a_cuenta(self):
+        cliente = Cliente.objects.create(
+            nombre_c='Nombre anterior',
+            telefono='111',
+            correo='cliente@example.com',
+        )
+
+        response = self.reservar()
+
+        cliente.refresh_from_db()
+        self.assertRedirects(response, reverse('ver_citas_cliente'))
+        self.assertEqual(Cliente.objects.count(), 1)
+        self.assertEqual(cliente.nombre_c, 'Cliente de prueba')
+        self.assertEqual(cliente.telefono, '+56912345678')
+        self.assertTrue(cliente.usuario.check_password('+56912345678'))
+
     def test_login_cliente_muestra_errores_en_espanol(self):
         response = self.client.post(reverse('login_cliente'), {
-            'correo': 'no-es-un-correo',
+            'nombre': '',
             'password': '',
         })
 
-        self.assertContains(response, 'Ingresa un correo electrónico válido.')
-        self.assertContains(response, 'Ingresa tu contraseña.')
+        self.assertContains(response, 'Ingresa tu nombre.')
+        self.assertContains(response, 'Ingresa tu teléfono como contraseña.')
 
-    def test_login_cliente_con_credenciales_incorrectas_muestra_error_en_espanol(self):
-        self.client.post(reverse('registro_cliente'), self.registration_data)
+    def test_login_cliente_rechaza_contrasena_incorrecta(self):
+        self.reservar()
         self.client.logout()
 
         response = self.client.post(reverse('login_cliente'), {
-            'correo': self.registration_data['correo'],
+            'nombre': 'Cliente de prueba',
             'password': 'incorrecta',
         })
 
-        self.assertContains(response, 'Nombre de usuario o contraseña incorrectos.')
+        self.assertContains(response, 'Nombre o contraseña incorrectos.')
+
+    def test_crear_cuenta_manual_redirige_al_login(self):
+        response = self.client.get(reverse('registro_cliente'))
+
+        self.assertRedirects(response, reverse('login_cliente'))
+        self.assertFalse(Cliente.objects.exists())
 
     def test_landing_cliente_muestra_saludo_y_solo_requiere_sesion_cliente(self):
-        self.client.post(reverse('registro_cliente'), self.registration_data)
+        response_reserva = self.reservar()
+        self.assertRedirects(response_reserva, reverse('ver_citas_cliente'))
 
         response = self.client.get(reverse('landing_cliente'))
 

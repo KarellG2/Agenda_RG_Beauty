@@ -1,0 +1,43 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Profesionales | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="profesionales" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <section aria-labelledby="professionals-title">
+        <h1 class="admin-section-title" id="professionals-title">Profesionales</h1>
+        <p class="admin-section-description">
+            Administra el equipo y sus especialidades.
+        </p>
+        <a class="primary-btn services-add-button" href="{% url 'profesional_crear' %}">
+            Crear profesional
+        </a>
+
+        {% if profesionales %}
+            <div class="services-grid">
+                {% for profesional in profesionales %}
+                    <article class="admin-card service-item">
+                        <h2>{{ profesional.nombre }}</h2>
+                        <p class="service-category">{{ profesional.id_rol.nombre_rol }}</p>
+                        <p class="service-description">{{ profesional.credenciales }}</p>
+                        <p>{{ profesional.años_experiencia }} años de experiencia</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="admin-card admin-empty-state" role="status">
+                <p>Aún no hay profesionales registrados. Crea uno para poder asignarlo a un servicio.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

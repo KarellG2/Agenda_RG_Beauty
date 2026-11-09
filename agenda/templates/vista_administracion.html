@@ -16,45 +16,48 @@
         <h2>Resumen de agenda</h2>
         <div class="summary-grid">
             <div class="summary-card">
-                <span class="summary-number">0</span>
+                <span class="summary-number">{{ citas_hoy }}</span>
                 <span class="summary-label">Citas de hoy</span>
             </div>
             <div class="summary-card">
-                <span class="summary-number">0</span>
+                <span class="summary-number">{{ pendientes }}</span>
                 <span class="summary-label">Pendientes</span>
             </div>
             <div class="summary-card">
-                <span class="summary-number">0</span>
+                <span class="summary-number">{{ confirmadas }}</span>
                 <span class="summary-label">Confirmadas</span>
             </div>
             <div class="summary-card">
-                <span class="summary-number">0</span>
+                <span class="summary-number">{{ canceladas }}</span>
                 <span class="summary-label">Canceladas</span>
             </div>
             <div class="summary-card">
-                <span class="summary-number">0</span>
-                <span class="summary-label">No asistidas</span>
+                <span class="summary-number">{{ total_reservas }}</span>
+                <span class="summary-label">Reservas totales</span>
             </div>
         </div>
     </section>
 
     <section class="admin-section indicators">
         <h2>Indicadores operacionales</h2>
-        <!-- <p class="section-note">DATOS DE DEMOSTRACIÓN. Estos tres indicadores son ejemplos ilustrativos; no son métricas calculadas de las citas reales.</p> -->
+        <p class="section-note">Indicadores calculados desde los datos guardados.</p>
 
         <div class="indicator-grid">
             <div class="indicator-card">
-                <span class="indicator-label">Ocupación · ejemplo</span>
-                <div class="indicator-value">68 %</div>
+                <span class="indicator-label">Clientes registrados</span>
+                <div class="indicator-value">{{ clientes_registrados }}</div>
             </div>
             <div class="indicator-card">
-                <span class="indicator-label">Tasa de cancelación · ejemplo</span>
-                <div class="indicator-value">12 %</div>
+                <span class="indicator-label">Profesionales</span>
+                <div class="indicator-value">{{ profesionales_registrados }}</div>
             </div>
             <div class="indicator-card">
-                <span class="indicator-label">Tiempo muerto · ejemplo</span>
-                <div class="indicator-value">4,5 h</div>
-                <small>Horas ilustrativas, no medidas.</small>
+                <span class="indicator-label">Servicios</span>
+                <div class="indicator-value">{{ servicios_registrados }}</div>
+            </div>
+            <div class="indicator-card">
+                <span class="indicator-label">Tasa de cancelación</span>
+                <div class="indicator-value">{{ tasa_cancelacion }} %</div>
             </div>
         </div>
     </section>

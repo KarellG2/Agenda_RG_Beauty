@@ -15,6 +15,17 @@
     --soft: #f2e8ea;
 }
 
+.appointment-tag {
+    display: inline-block;
+    margin: 2px 3px 2px 0;
+    padding: 3px 9px;
+    border: 1px solid color-mix(in srgb, var(--tag-color) 60%, #777);
+    border-radius: 999px;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--tag-color) 22%, white);
+    font: 600 0.75rem "Segoe UI", sans-serif;
+}
+
 * {
     box-sizing: border-box;
 }

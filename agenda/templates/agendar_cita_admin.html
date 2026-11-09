@@ -20,51 +20,6 @@
         </div>
     {% endif %}
 
-    <section class="panel agenda-form-panel">
-        <h2>Registrar una cita manualmente</h2>
-        <p>Agrega una reserva para un cliente usando su teléfono de contacto.</p>
-
-        <form class="agenda-form" method="post">
-            {% csrf_token %}
-            <div class="form-row">
-                <div class="field-group">
-                    {{ form.telefono.label_tag }}
-                    {{ form.telefono }}
-                    {{ form.telefono.errors }}
-                </div>
-
-                <div class="field-group">
-                    {{ form.nombre.label_tag }}
-                    {{ form.nombre }}
-                    {{ form.nombre.errors }}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="field-group">
-                    {{ form.servicio.label_tag }}
-                    {{ form.servicio }}
-                    {{ form.servicio.errors }}
-                </div>
-
-                <div class="field-group">
-                    {{ form.fecha.label_tag }}
-                    {{ form.fecha }}
-                    {{ form.fecha.errors }}
-                </div>
-            </div>
-
-            <div class="form-row single-row">
-                <div class="field-group">
-                    {{ form.hora.label_tag }}
-                    {{ form.hora }}
-                    {{ form.hora.errors }}
-                </div>
-                <button type="submit" class="primary-btn">Registrar cita</button>
-            </div>
-        </form>
-    </section>
-
     <form class="toggle-row" method="get" aria-label="Selector de vista">
         <input type="hidden" name="fecha" value="{{ fecha_seleccionada|date:'Y-m-d' }}">
         <input type="hidden" name="cliente" value="{{ cliente_busqueda }}">
@@ -139,7 +94,14 @@
                     <div>
                         <h3>{{ reserva.id_cliente.nombre_c }}</h3>
                         <p>{{ reserva.id_personal_servicio.id_servicio.nombre_s }} · {{ reserva.id_personal.nombre }}</p>
-                        <p>{{ reserva.fecha|date:'d-m-Y' }} · {{ reserva.hora|time:'H:i' }} · {{ reserva.id_cliente.telefono }}</p>
+                        <p>{{ reserva.fecha|date:'d-m-Y' }} · {{ reserva.hora|time:'H:i' }} · {{ reserva.id_cliente.telefono }} · {{ reserva.id_cliente.correo }}</p>
+                        {% if reserva.etiquetas.exists %}
+                            <p class="appointment-tags">
+                                {% for etiqueta in reserva.etiquetas.all %}
+                                    <span class="appointment-tag" style="--tag-color: {{ etiqueta.color }}">{{ etiqueta.nombre }}</span>
+                                {% endfor %}
+                            </p>
+                        {% endif %}
                     </div>
                     <span class="appointment-status status-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span>
                 </article>

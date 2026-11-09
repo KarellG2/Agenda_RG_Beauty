@@ -18,6 +18,47 @@
     margin: 0;
 }
 
+.reserva-form .campo-formulario small {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.tag-list ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tag-list li {
+    margin: 0;
+    padding: 0;
+}
+
+.tag-list label {
+    display: inline-flex !important;
+    min-height: 38px;
+    align-items: center;
+    gap: 7px;
+    margin: 0 !important;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fffafc;
+    cursor: pointer;
+}
+
+.tag-list input[type="checkbox"] {
+    width: auto;
+    min-height: auto;
+    margin: 0;
+    accent-color: var(--button);
+}
+
 .reserva-form .campo-formulario label {
     display: block;
     margin-bottom: 7px;

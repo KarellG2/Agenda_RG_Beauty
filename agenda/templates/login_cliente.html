@@ -18,26 +18,26 @@
         <header class="auth-heading">
             <p class="cliente-eyebrow">Tu momento de bienestar</p>
             <h1 id="client-login-title">Bienvenida de vuelta</h1>
-            <p>Inicia sesión para ver y gestionar tus reservas.</p>
+            <p>Ingresa tu nombre y usa tu teléfono como contraseña para ver y gestionar tus reservas.</p>
         </header>
 
         <form method="post" action="{% url 'login_cliente' %}" class="auth-form">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
             <div class="auth-field">
-                <label for="{{ form.correo.id_for_label }}">Correo electrónico</label>
-                {{ form.correo }}
-                {{ form.correo.errors }}
+                <label for="{{ form.nombre.id_for_label }}">Nombre</label>
+                {{ form.nombre }}
+                {{ form.nombre.errors }}
             </div>
             <div class="auth-field">
-                <label for="{{ form.password.id_for_label }}">Contraseña</label>
+                <label for="{{ form.password.id_for_label }}">Contraseña (tu teléfono)</label>
                 {{ form.password }}
                 {{ form.password.errors }}
             </div>
             <button type="submit" class="auth-submit">Iniciar sesión</button>
         </form>
 
-        <p class="auth-footer">¿Aún no tienes cuenta? <a href="{% url 'registro_cliente' %}">Crea tu cuenta</a></p>
+        <p class="auth-footer">¿Aún no tienes cuenta? <a href="{% url 'agendar_cita' %}">Agenda una cita y se creará automáticamente.</a></p>
         <a class="auth-back" href="{% url 'acceso' %}">← Volver a elegir tipo de acceso</a>
     </section>
 </div>

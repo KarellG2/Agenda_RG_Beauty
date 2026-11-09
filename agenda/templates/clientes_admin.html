@@ -5,6 +5,7 @@
 
 {% block page_styles %}
 <link rel="stylesheet" href="{% static 'clientes.css' %}">
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
 {% endblock %}
 
 {% block topbar %}
@@ -13,13 +14,9 @@
 
 {% block content %}
 <div class="admin-section-page clients-page">
-    <!-- <div class="admin-demo-notice" role="note">
-        Modo de demostración: esta vista no se conecta ni guarda datos en la base de datos.
-    </div> -->
-
     <section aria-labelledby="clients-title">
         <h1 class="admin-section-title" id="clients-title">Clientes</h1>
-        <!-- <p class="admin-section-description">Ficha mínima derivada de las reservas: nombre y contacto. Las citas anteriores que no incluyan estos datos no se completan automáticamente.</p> -->
+        <p class="admin-section-description">Clientes y reservas registrados en la base de datos.</p>
 
         <form class="clients-search" role="search" method="get">
             <label for="client-search">Buscar por nombre o contacto</label>
@@ -28,20 +25,21 @@
         </form>
         
         {% if clientes %}
-            <ul class="card-list" style="list-style: none;">
+            <div class="services-grid">
                 {% for cliente in clientes %}
-                <li class="card-list-item" style="list-style: none;">
-                    <div class="admin-card">
-                        <h2 class="admin-card-title">{{ cliente.nombre_c }}</h2>
-                        <p class="admin-card-description">Correo: {{ cliente.correo }}</p>
-                        <p class="admin-card-description">Teléfono: {{ cliente.telefono }}</p>
-                        <p class="admin-card-description">
+                    <article class="admin-card service-item">
+                        <h2>{{ cliente.nombre_c }}</h2>
+                        <p class="service-description">Correo: {{ cliente.correo }}</p>
+                        <p class="service-description">Teléfono: {{ cliente.telefono }}</p>
+                        <p class="service-description">
                             {% if cliente.usuario_id %}Cuenta registrada{% else %}Sin cuenta de acceso{% endif %}
                         </p>
-                    </div>
-                </li>
+                        <p class="service-assignment">
+                            {{ cliente.cantidad_reservas }} reserva{{ cliente.cantidad_reservas|pluralize:"s" }}
+                        </p>
+                    </article>
                 {% endfor %}
-            </ul>
+            </div>
         {% else %}
             <div class="admin-card admin-empty-state" role="status">
                 <p>No hay clientes que coincidan con la búsqueda.</p>

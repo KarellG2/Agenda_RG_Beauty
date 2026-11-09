@@ -36,6 +36,7 @@
                                 <th>Fecha</th>
                                 <th>Hora</th>
                                 <th>Servicio</th>
+                                <th>Etiquetas</th>
                                 <th>Estado</th>
                             </tr>
                         </thead>
@@ -67,6 +68,14 @@
 
                                     <td>
                                         {{ cita.id_personal_servicio.id_servicio.nombre_s }}
+                                    </td>
+
+                                    <td>
+                                        {% for etiqueta in cita.etiquetas.all %}
+                                            <span class="appointment-tag" style="--tag-color: {{ etiqueta.color }}">{{ etiqueta.nombre }}</span>
+                                        {% empty %}
+                                            Sin etiquetas
+                                        {% endfor %}
                                     </td>
 
                                     <td>

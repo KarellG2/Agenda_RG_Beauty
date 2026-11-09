@@ -29,7 +29,7 @@
             <h1>Un momento para ti, una belleza que se siente.</h1>
             <p>Descubre nuestros tratamientos y reserva una experiencia pensada para que te sientas bien por dentro y por fuera.</p>
             <div class="landing-actions">
-                <a class="agenda-button" href="{% url 'acceso' %}">Reserva tu hora</a>
+                <a class="agenda-button" href="{% url 'agendar_cita' %}">Reserva tu hora</a>
                 <a class="landing-secondary-link" href="#servicios">Conoce nuestros servicios</a>
             </div>
         </div>
@@ -63,7 +63,7 @@
                             Consulta disponibilidad y precio al reservar
                         {% endif %}
                     </p>
-                    <a href="{% url 'acceso' %}">Reservar este servicio <span aria-hidden="true">→</span></a>
+                    <a href="{% url 'agendar_cita' %}">Reservar este servicio <span aria-hidden="true">→</span></a>
                 </article>
             {% empty %}
                 <div class="landing-empty">
@@ -101,9 +101,9 @@
 
     <section class="landing-cta">
         <p class="landing-eyebrow">Tu próximo momento comienza aquí</p>
-        <h2>¿Lista para reservar?</h2>
-        <p>Inicia sesión o crea tu cuenta para elegir el tratamiento y horario que prefieras.</p>
-        <a class="agenda-button" href="{% url 'acceso' %}">Ver opciones de acceso</a>
+        <h2>¿Quieres agendar una cita?</h2>
+        <p>Elige tu servicio y horario. Al confirmar, tu cuenta se creará automáticamente y quedará iniciada tu sesión.</p>
+        <a class="agenda-button" href="{% url 'agendar_cita' %}">Agenda tu cita</a>
     </section>
 
     <footer class="landing-footer">

@@ -137,7 +137,10 @@ class ServicioPersonal(models.Model):
         db_table = 'servicio_personal'
 
     def __str__(self):
-        return f"{self.id_servicio} - {self.id_personal}"
+        return (
+            f'{self.id_servicio} - {self.id_personal} '
+            f'(${self.precio} CLP, {self.duracion_aproximada} min)'
+        )
 
 
 # TABLA PAGO_ABONO

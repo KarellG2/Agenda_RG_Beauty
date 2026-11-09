@@ -1,7 +1,6 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from django import forms
-from django.contrib.auth import get_user_model, password_validation
 from django.core.exceptions import ValidationError
 from .models import *
 
@@ -18,7 +17,63 @@ HORARIOS_DISPONIBLES = [
 ]
 
 
+def reserva_se_superpone(servicio, fecha, hora):
+    inicio_nuevo = datetime.combine(fecha, hora)
+    fin_nuevo = inicio_nuevo + timedelta(
+        minutes=servicio.duracion_aproximada,
+    )
+    reservas_existentes = Reserva.objects.filter(
+        id_personal=servicio.id_personal,
+        fecha=fecha,
+    ).exclude(estado='cancelado').select_related('id_personal_servicio')
+
+    for reserva in reservas_existentes:
+        inicio_existente = datetime.combine(fecha, reserva.hora)
+        fin_existente = inicio_existente + timedelta(
+            minutes=reserva.id_personal_servicio.duracion_aproximada,
+        )
+        if inicio_nuevo < fin_existente and inicio_existente < fin_nuevo:
+            return True
+    return False
+
+
 class ServicioForm(forms.ModelForm):
+    personal = forms.ModelChoiceField(
+        queryset=Personal.objects.none(),
+        label='Profesional a cargo',
+        error_messages={'required': 'Selecciona al profesional a cargo.'},
+        widget=forms.Select(attrs={'class': 'admin-field'}),
+    )
+    duracion_aproximada = forms.IntegerField(
+        min_value=1,
+        label='Duración aproximada (minutos)',
+        error_messages={
+            'required': 'Indica la duración aproximada.',
+            'min_value': 'La duración debe ser de al menos un minuto.',
+            'invalid': 'Ingresa una duración válida en minutos.',
+        },
+        widget=forms.NumberInput(attrs={
+            'class': 'admin-field',
+            'min': 1,
+        }),
+    )
+    precio = forms.DecimalField(
+        min_value=0,
+        max_digits=10,
+        decimal_places=2,
+        label='Precio (CLP)',
+        error_messages={
+            'required': 'Indica el precio del servicio.',
+            'min_value': 'El precio no puede ser negativo.',
+            'invalid': 'Ingresa un precio válido.',
+        },
+        widget=forms.NumberInput(attrs={
+            'class': 'admin-field',
+            'min': 0,
+            'step': '0.01',
+        }),
+    )
+
     class Meta:
         model = Servicio
         fields = ['nombre_s', 'descripcion', 'categoria']
@@ -35,13 +90,233 @@ class ServicioForm(forms.ModelForm):
             }),
             'categoria': forms.Select(attrs={'class': 'admin-field'}),
         }
+        error_messages = {
+            'nombre_s': {
+                'required': 'Ingresa el nombre del servicio.',
+                'max_length': 'El nombre no puede superar los 100 caracteres.',
+            },
+            'descripcion': {
+                'required': 'Ingresa una descripción del servicio.',
+            },
+        }
+
+    def clean_nombre_s(self):
+        nombre = self.cleaned_data['nombre_s'].strip()
+        if not nombre:
+            raise ValidationError('Ingresa el nombre del servicio.')
+        return nombre
+
+    def clean_descripcion(self):
+        descripcion = self.cleaned_data['descripcion'].strip()
+        if not descripcion:
+            raise ValidationError('Ingresa una descripción del servicio.')
+        return descripcion
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['personal'].queryset = Personal.objects.select_related(
+            'id_rol'
+        ).order_by('nombre')
+        if self.instance.pk:
+            asignacion = self.instance.personal_asignado.order_by(
+                'id_personal__nombre'
+            ).first()
+            if asignacion:
+                self.initial.update({
+                    'personal': asignacion.id_personal_id,
+                    'duracion_aproximada': asignacion.duracion_aproximada,
+                    'precio': asignacion.precio,
+                })
+
+    def save_asignacion(self, servicio):
+        ServicioPersonal.objects.update_or_create(
+            id_servicio=servicio,
+            id_personal=self.cleaned_data['personal'],
+            defaults={
+                'duracion_aproximada': self.cleaned_data['duracion_aproximada'],
+                'precio': self.cleaned_data['precio'],
+            },
+        )
+
+
+class RolForm(forms.ModelForm):
+    class Meta:
+        model = Rol
+        fields = ['nombre_rol', 'descripcion']
+        labels = {
+            'nombre_rol': 'Nombre del cargo o especialidad',
+            'descripcion': 'Descripción',
+        }
+        widgets = {
+            'nombre_rol': forms.TextInput(attrs={'class': 'admin-field'}),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'admin-field admin-textarea',
+                'rows': 4,
+            }),
+        }
+        error_messages = {
+            'nombre_rol': {
+                'required': 'Ingresa el nombre del cargo o especialidad.',
+            },
+            'descripcion': {'required': 'Ingresa una descripción.'},
+        }
+
+    def clean_nombre_rol(self):
+        nombre = self.cleaned_data['nombre_rol'].strip()
+        if not nombre:
+            raise ValidationError('Ingresa el nombre del cargo o especialidad.')
+        if Rol.objects.filter(nombre_rol__iexact=nombre).exists():
+            raise ValidationError('Ya existe un cargo o especialidad con ese nombre.')
+        return nombre
+
+    def clean_descripcion(self):
+        descripcion = self.cleaned_data['descripcion'].strip()
+        if not descripcion:
+            raise ValidationError('Ingresa una descripción.')
+        return descripcion
+
+
+class PersonalForm(forms.ModelForm):
+    class Meta:
+        model = Personal
+        fields = ['nombre', 'credenciales', 'años_experiencia', 'id_rol']
+        labels = {
+            'nombre': 'Nombre del profesional',
+            'credenciales': 'Credenciales o formación',
+            'años_experiencia': 'Años de experiencia',
+            'id_rol': 'Cargo o especialidad',
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'admin-field'}),
+            'credenciales': forms.TextInput(attrs={'class': 'admin-field'}),
+            'años_experiencia': forms.NumberInput(attrs={
+                'class': 'admin-field',
+                'min': 0,
+            }),
+            'id_rol': forms.Select(attrs={'class': 'admin-field'}),
+        }
+        error_messages = {
+            'nombre': {'required': 'Ingresa el nombre del profesional.'},
+            'credenciales': {'required': 'Ingresa sus credenciales o formación.'},
+            'años_experiencia': {
+                'required': 'Ingresa los años de experiencia.',
+                'invalid': 'Ingresa una cantidad válida de años.',
+                'min_value': 'Los años de experiencia no pueden ser negativos.',
+            },
+            'id_rol': {'required': 'Selecciona un cargo o especialidad.'},
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['id_rol'].queryset = Rol.objects.order_by('nombre_rol')
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre'].strip()
+        if not nombre:
+            raise ValidationError('Ingresa el nombre del profesional.')
+        return nombre
+
+    def clean_credenciales(self):
+        credenciales = self.cleaned_data['credenciales'].strip()
+        if not credenciales:
+            raise ValidationError('Ingresa sus credenciales o formación.')
+        return credenciales
+
+
+class EtiquetaForm(forms.ModelForm):
+    color = forms.RegexField(
+        regex=r'^#[0-9A-Fa-f]{6}$',
+        label='Color',
+        error_messages={
+            'required': 'Selecciona un color.',
+            'invalid': 'El color debe estar en formato hexadecimal, por ejemplo #D9C7CC.',
+        },
+        widget=forms.TextInput(attrs={
+            'class': 'admin-field tag-color-input',
+            'type': 'color',
+        }),
+    )
+
+    class Meta:
+        model = Etiqueta
+        fields = ['nombre', 'color']
+        labels = {'nombre': 'Nombre de la etiqueta'}
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'admin-field'}),
+        }
+        error_messages = {
+            'nombre': {
+                'required': 'Ingresa el nombre de la etiqueta.',
+                'max_length': 'El nombre no puede superar los 50 caracteres.',
+            },
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre'].strip()
+        if not nombre:
+            raise ValidationError('Ingresa el nombre de la etiqueta.')
+        if Etiqueta.objects.filter(nombre__iexact=nombre).exists():
+            raise ValidationError('Ya existe una etiqueta con ese nombre.')
+        return nombre
+
+
+class CategoriaServicioForm(forms.ModelForm):
+    class Meta:
+        model = CategoriaServicio
+        fields = ['nombre', 'descripcion']
+        labels = {
+            'nombre': 'Nombre de la categoría',
+            'descripcion': 'Descripción (opcional)',
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'admin-field'}),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'admin-field admin-textarea',
+                'rows': 4,
+            }),
+        }
+        error_messages = {
+            'nombre': {
+                'required': 'Ingresa el nombre de la categoría.',
+                'max_length': 'El nombre no puede superar los 100 caracteres.',
+            },
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre'].strip()
+        if not nombre:
+            raise ValidationError('Ingresa el nombre de la categoría.')
+        if CategoriaServicio.objects.filter(nombre__iexact=nombre).exists():
+            raise ValidationError('Ya existe una categoría con ese nombre.')
+        return nombre
+
+    def clean_descripcion(self):
+        return self.cleaned_data['descripcion'].strip()
 
 
 class ReservaForm(forms.ModelForm):
     hora = forms.ChoiceField(choices=HORARIOS_DISPONIBLES)
-    nombre_cliente = forms.CharField(max_length=100, label="Ingrese su Nombre")
-    telefono_cliente = forms.CharField(max_length=20, label="Ingrese su Teléfono")
-    correo_cliente = forms.EmailField(max_length=100, label="Ingrese su Correo Electrónico")
+    nombre_cliente = forms.CharField(
+        max_length=100,
+        label='Ingrese su Nombre',
+        error_messages={'required': 'Ingresa tu nombre.'},
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    telefono_cliente = forms.CharField(
+        max_length=20,
+        label='Ingrese su Teléfono',
+        error_messages={'required': 'Ingresa tu teléfono.'},
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    correo_cliente = forms.EmailField(
+        max_length=100,
+        label='Ingrese su Correo Electrónico',
+        error_messages={
+            'required': 'Ingresa tu correo electrónico.',
+            'invalid': 'Ingresa un correo electrónico válido.',
+        },
+        widget=forms.EmailInput(attrs={'class': 'form-control'}),
+    )
 
     class Meta:
         model = Reserva
@@ -55,6 +330,7 @@ class ReservaForm(forms.ModelForm):
         labels = {
             'id_personal_servicio': 'Elija un servicio y profesional',
             'fecha': 'Fecha',
+            'etiquetas': 'Etiquetas (opcional)',
         }
 
         widgets = {
@@ -65,13 +341,50 @@ class ReservaForm(forms.ModelForm):
                 'type': 'date',
                 'class': 'form-control',
             }),
+            'etiquetas': forms.CheckboxSelectMultiple(),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, cliente=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['id_personal_servicio'].queryset = (
-            ServicioPersonal.objects.select_related('id_servicio', 'id_personal')
+            ServicioPersonal.objects.select_related(
+                'id_servicio',
+                'id_personal',
+            ).order_by('id_servicio__nombre_s', 'id_personal__nombre')
         )
+        self.fields['etiquetas'].queryset = Etiqueta.objects.order_by('nombre')
+        if cliente:
+            for field_name, value in (
+                ('nombre_cliente', cliente.nombre_c),
+                ('telefono_cliente', cliente.telefono),
+                ('correo_cliente', cliente.correo),
+            ):
+                self.fields[field_name].initial = value
+                self.fields[field_name].disabled = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        servicio = cleaned_data.get('id_personal_servicio')
+        fecha = cleaned_data.get('fecha')
+        hora = cleaned_data.get('hora')
+        if fecha and fecha < date.today():
+            self.add_error('fecha', 'La fecha de la cita no puede estar en el pasado.')
+        if (
+            servicio
+            and fecha
+            and hora
+            and reserva_se_superpone(
+                servicio,
+                fecha,
+                datetime.strptime(hora, '%H:%M').time(),
+            )
+        ):
+            self.add_error(
+                'hora',
+                'Ese profesional ya tiene una cita en ese horario.',
+            )
+        return cleaned_data
+
 
 class AutenticacionForm(forms.Form):
     nombre = forms.CharField(
@@ -86,116 +399,21 @@ class AutenticacionForm(forms.Form):
     )
 
 
-class RegistroClienteForm(forms.Form):
+class AutenticacionClienteForm(forms.Form):
     nombre = forms.CharField(
         max_length=100,
-        label='Nombre completo',
-        error_messages={'required': 'Ingresa tu nombre.'},
+        label='Nombre',
+        error_messages={
+            'required': 'Ingresa tu nombre.',
+        },
         widget=forms.TextInput(attrs={
             'autocomplete': 'name',
             'class': 'form-control',
         }),
     )
-    telefono = forms.CharField(
-        max_length=20,
-        label='Teléfono',
-        error_messages={'required': 'Ingresa tu teléfono.'},
-        widget=forms.TextInput(attrs={
-            'autocomplete': 'tel',
-            'class': 'form-control',
-        }),
-    )
-    correo = forms.EmailField(
-        max_length=150,
-        label='Correo electrónico',
-        error_messages={
-            'required': 'Ingresa tu correo electrónico.',
-            'invalid': 'Ingresa un correo electrónico válido.',
-        },
-        widget=forms.EmailInput(attrs={
-            'autocomplete': 'email',
-            'class': 'form-control',
-        }),
-    )
-    password1 = forms.CharField(
-        label='Contraseña',
-        error_messages={'required': 'Ingresa una contraseña.'},
-        help_text=(
-            'Mínimo 8 caracteres, una mayúscula, un número y un carácter especial.'
-        ),
-        widget=forms.PasswordInput(attrs={
-            'autocomplete': 'new-password',
-            'class': 'form-control',
-        }),
-    )
-    password2 = forms.CharField(
-        label='Repetir contraseña',
-        error_messages={'required': 'Repite tu contraseña.'},
-        widget=forms.PasswordInput(attrs={
-            'autocomplete': 'new-password',
-            'class': 'form-control',
-        }),
-    )
-
-    def clean_correo(self):
-        correo = self.cleaned_data['correo'].strip().lower()
-        user_model = get_user_model()
-        if user_model.objects.filter(email__iexact=correo).exists():
-            raise ValidationError('Ya existe una cuenta con este correo.')
-        return correo
-
-    def clean(self):
-        cleaned_data = super().clean()
-        nombre = cleaned_data.get('nombre')
-        telefono = cleaned_data.get('telefono')
-        correo = cleaned_data.get('correo')
-        if nombre and telefono and correo:
-            clientes_correo = Cliente.objects.filter(correo__iexact=correo)
-            if clientes_correo.exists():
-                coincidencias = clientes_correo.filter(
-                    nombre_c__iexact=nombre.strip(),
-                    telefono=telefono.strip(),
-                    usuario__isnull=True,
-                )
-                if clientes_correo.filter(usuario__isnull=False).exists():
-                    self.add_error('correo', 'Este correo ya tiene una cuenta.')
-                elif coincidencias.count() == 1:
-                    cleaned_data['cliente_existente'] = coincidencias.first()
-                else:
-                    self.add_error(
-                        'correo',
-                        'Ya hay un perfil con este correo. Verifica nombre y teléfono.',
-                    )
-
-        password1 = cleaned_data.get('password1')
-        password2 = cleaned_data.get('password2')
-        if password1 and password2:
-            if password1 != password2:
-                self.add_error('password2', 'Las contraseñas no coinciden.')
-            else:
-                try:
-                    password_validation.validate_password(password2)
-                except ValidationError as error:
-                    self.add_error('password2', error)
-        return cleaned_data
-
-
-class AutenticacionClienteForm(forms.Form):
-    correo = forms.EmailField(
-        max_length=150,
-        label='Correo electrónico',
-        error_messages={
-            'required': 'Ingresa tu correo electrónico.',
-            'invalid': 'Ingresa un correo electrónico válido.',
-        },
-        widget=forms.EmailInput(attrs={
-            'autocomplete': 'email',
-            'class': 'form-control',
-        }),
-    )
     password = forms.CharField(
-        label='Contraseña',
-        error_messages={'required': 'Ingresa tu contraseña.'},
+        label='Contraseña (tu teléfono)',
+        error_messages={'required': 'Ingresa tu teléfono como contraseña.'},
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'current-password',
             'class': 'form-control',

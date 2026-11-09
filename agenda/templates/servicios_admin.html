@@ -17,6 +17,8 @@
         <h1 class="admin-section-title" id="services-title">Servicios</h1>
         <p class="admin-section-description">Administra el catálogo de tratamientos. Los precios corresponden a los valores asignados a cada profesional.</p>
         <a class="primary-btn services-add-button" href="{% url 'servicio_crear' %}">Agregar servicio</a>
+        <a class="btn-outline services-add-button" href="{% url 'categoria_servicio_crear' %}">Crear categoría</a>
+        <a class="btn-outline services-add-button" href="{% url 'etiquetas_admin' %}">Administrar etiquetas</a>
 
         {% if servicios %}
             <div class="services-grid">
@@ -30,6 +32,15 @@
                             {% if servicio.descripcion %}
                                 <p class="service-description">{{ servicio.descripcion }}</p>
                             {% endif %}
+                            {% for asignacion in servicio.personal_asignado.all %}
+                                <p class="service-assignment">
+                                    {{ asignacion.id_personal.nombre }} ·
+                                    ${{ asignacion.precio|floatformat:0 }} CLP ·
+                                    {{ asignacion.duracion_aproximada }} min
+                                </p>
+                            {% empty %}
+                                <p class="service-assignment">Sin profesional asignado</p>
+                            {% endfor %}
                             {% if servicio.precio_minimo != None %}
                                 {% if servicio.precio_minimo == servicio.precio_maximo %}
                                     <p>${{ servicio.precio_minimo|floatformat:0 }} CLP</p>

@@ -48,9 +48,6 @@
             <h2 id="nueva-reserva-title">Agenda una cita</h2>
             <p>Elige tu tratamiento y encuentra un horario que te acomode.</p>
             <a href="{% url 'agendar_cita' %}" class="agenda-button">Agendar cita</a>
-            {% if not user.is_authenticated %}
-            <p class="account-prompt">¿Aún no tienes cuenta? <a href="{% url 'registro_cliente' %}">Crear cuenta</a></p>
-            {% endif %}
         </aside>
     </div>
 </div>
