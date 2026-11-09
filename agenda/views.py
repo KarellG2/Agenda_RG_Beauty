@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from .models import *
 
+from django.core.paginator import Paginator
 
 def es_staff(user):
     return user.is_authenticated and user.is_staff
@@ -330,7 +331,12 @@ def clientes_admin(request):
     resultados = resultados.annotate(
         cantidad_reservas=Count('reservas', distinct=True),
     ).order_by('nombre_c', 'id_cliente')
-    return render(request, 'clientes_admin.html', {'clientes': resultados})
+
+    paginator = Paginator(resultados, 10)  # 10 RESULTADOS PAGINA
+    page_number = request.GET.get('page') # NUMERO PAGINA
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'clientes_admin.html', {'clientes': page_obj})
 
 
 @user_passes_test(es_staff, login_url='login')
@@ -341,14 +347,22 @@ def servicios_admin(request):
     ).prefetch_related(
         'personal_asignado__id_personal',
     ).order_by('nombre_s')
-    return render(request, 'servicios_admin.html', {'servicios': servicios})
+    
+    paginator = Paginator(servicios, 4)  # 4 RESULTADOS PAGINA
+    page_number = request.GET.get('page') # NUMERO PAGINA
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'servicios_admin.html', {'servicios': page_obj})
 
 
 @user_passes_test(es_staff, login_url='login')
 def profesionales_admin(request):
     profesionales = Personal.objects.select_related('id_rol').order_by('nombre')
+    paginator = Paginator(profesionales, 10)  # 10 RESULTADOS PAGINA
+    page_number = request.GET.get('page') # NUMERO PAGINA
+    page_obj = paginator.get_page(page_number)
     return render(request, 'profesionales_admin.html', {
-        'profesionales': profesionales,
+        'profesionales': page_obj,
     })
 
 

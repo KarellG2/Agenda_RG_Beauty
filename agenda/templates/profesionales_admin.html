@@ -33,6 +33,23 @@
                     </article>
                 {% endfor %}
             </div>
+            <div class="pagination" >
+                <span class="steps">
+                    {% if profesionales.has_previous %}
+                    <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">&laquo; primera</a>
+                    <a href="?page={{ profesionales.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">anterior</a>
+                    {% endif %}
+                    <span class="current">
+                        pagina {{ profesionales.number }} de {{ profesionales.paginator.num_pages }}.
+                    </span>
+
+                    {% if profesionales.has_next %}
+                        <a href="?page={{ profesionales.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">siguiente</a>
+                        <a href="?page={{ profesionales.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">última &raquo;</a>
+                    {% endif %}
+
+                </span>
+            </div>
         {% else %}
             <div class="admin-card admin-empty-state" role="status">
                 <p>Aún no hay profesionales registrados. Crea uno para poder asignarlo a un servicio.</p>

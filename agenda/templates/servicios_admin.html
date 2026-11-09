@@ -61,6 +61,23 @@
                     </article>
                 {% endfor %}
             </div>
+            <div class="pagination" >
+                <span class="steps">
+                    {% if servicios.has_previous %}
+                    <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">&laquo; primera</a>
+                    <a href="?page={{ servicios.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">anterior</a>
+                    {% endif %}
+                    <span class="current">
+                        pagina {{ servicios.number }} de {{ servicios.paginator.num_pages }}.
+                    </span>
+
+                    {% if servicios.has_next %}
+                        <a href="?page={{ servicios.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">siguiente</a>
+                        <a href="?page={{ servicios.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">última &raquo;</a>
+                    {% endif %}
+
+                </span>
+            </div>
         {% else %}
             <div class="admin-card admin-empty-state" role="status">
                 <p>Aún no hay servicios registrados. Agrega el primero para comenzar.</p>
