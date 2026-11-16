@@ -688,7 +688,17 @@ def etiqueta_eliminar(request, pk):
 
 @user_passes_test(es_staff, login_url='login')
 def notificaciones_admin(request):
-    return render(request, 'notificaciones_admin.html')
+    notificacion = Notificacion.objects.select_related(
+        'id_cliente',
+        'id_reserva__id_personal_servicio__id_servicio',
+    ).order_by('-fecha')
+    paginator = Paginator(notificacion, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'notificaciones_admin.html', {
+        'notificaciones': page_obj,
+    })
 
 
 @user_passes_test(es_staff, login_url='login')

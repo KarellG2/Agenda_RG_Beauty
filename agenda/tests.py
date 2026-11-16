@@ -11,6 +11,7 @@ from .models import (
     CategoriaServicio,
     Etiqueta,
     Personal,
+    Notificacion,
     Reserva,
     Rol,
     Servicio,
@@ -639,6 +640,21 @@ class ReservaCrudTests(TestCase):
         self.assertContains(response, 'Profesional CRUD')
         self.assertContains(response, 'Cliente frecuente')
 
+    def test_editar_reserva_muestra_la_fecha_actual_en_el_formulario(self):
+        admin = get_user_model().objects.create_user(
+            username='admin-crud',
+            password='test-password',
+            is_staff=True,
+        )
+        self.client.force_login(admin)
+
+        response = self.client.get(
+            reverse('reserva_editar', args=[self.reserva.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="2027-01-15"')
+
     def test_editar_reserva_guarda_cambios_y_etiquetas(self):
         etiqueta_nueva = Etiqueta.objects.create(nombre='Reagendada')
         response = self.client.post(
@@ -805,6 +821,20 @@ class AdminLiveDataTests(TestCase):
         self.assertEqual(response.context['canceladas'], 1)
         self.assertEqual(response.context['tasa_cancelacion'], 100.0)
         self.assertEqual(response.context['citas_hoy'], 1)
+
+    def test_notificaciones_muestran_cliente_y_servicio(self):
+        Notificacion.objects.create(
+            id_cliente=self.cliente,
+            id_reserva=self.reserva,
+            mensaje='Reserva confirmada.',
+            fecha=timezone.now(),
+            tipo='Reserva',
+        )
+
+        response = self.client.get(reverse('notificaciones_admin'))
+
+        self.assertContains(response, 'Cliente real')
+        self.assertContains(response, 'Servicio real')
 
 
 class AdminLoginRedirectTests(TestCase):

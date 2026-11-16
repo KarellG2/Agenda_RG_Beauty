@@ -369,10 +369,13 @@ class ReservaForm(forms.ModelForm):
             'id_personal_servicio': forms.Select(attrs={
                 'class': 'form-control',
             }),
-            'fecha': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control',
-            }),
+            'fecha': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                },
+            ),
             'etiquetas': forms.CheckboxSelectMultiple(),
         }
 

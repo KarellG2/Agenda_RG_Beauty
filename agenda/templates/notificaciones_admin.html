@@ -13,27 +13,25 @@
 
 {% block content %}
 <div class="admin-section-page notifications-page">
-    <!-- <div class="admin-demo-notice" role="note">Modo de demostración: los mensajes son ejemplos y no se envían.</div> -->
 
     <section aria-labelledby="notifications-title">
         <h1 class="admin-section-title" id="notifications-title">Notificaciones</h1>
-        <!-- <p class="admin-section-description">Historial ilustrativo y simulación de recordatorios. No existe integración de envío automático ni conexión con WhatsApp.</p> -->
-        
-        <!-- <h2 class="admin-subsection-title">Historial de ejemplo · no enviado</h2> -->
-        <div class="notification-examples">
-            <article class="admin-card admin-example-card">
-                <h3>Confirmación · ejemplo</h3>
-                <p>Mensaje de confirmación ilustrativo para una cita confirmada.</p>
-            </article>
-            <article class="admin-card admin-example-card">
-                <h3>Recordatorio · ejemplo</h3>
-                <p>Aviso ilustrativo previo a una cita.</p>
-            </article>
-            <article class="admin-card admin-example-card">
-                <h3>Aviso de cambio · ejemplo</h3>
-                <p>Comunicación ilustrativa de una reprogramación.</p>
-            </article>
-        </div>
+
+        {% if notificaciones %}
+            <div class="notification-examples">
+                {% for notificacion in notificaciones %}
+                    <article class="admin-card admin-example-card">
+                        <h3>{{ notificacion.tipo }}</h3>
+                        <p><strong>Cliente:</strong> {{ notificacion.id_cliente.nombre_c }}</p>
+                        <p><strong>Servicio:</strong> {{ notificacion.id_reserva.id_personal_servicio.id_servicio.nombre_s }}</p>
+                        <p>{{ notificacion.mensaje }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="admin-card admin-empty-state" role="status">No hay notificaciones disponibles.</div>
+        {% endif %}
+
 
         <h2 class="admin-subsection-title reminders-title">Preparar recordatorio · simulación</h2>
         <div class="admin-card admin-empty-state" role="status">No hay próximas citas para preparar recordatorios.</div>
