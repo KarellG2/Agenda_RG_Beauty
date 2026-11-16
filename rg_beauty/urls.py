@@ -25,24 +25,48 @@ urlpatterns = [
     path('landing_cliente/', views.landing_cliente, name='landing_cliente'),
     path('agendar_cita/', views.agendar_cita, name='agendar_cita'),
     path('ver_citas_cliente/', views.ver_citas_cliente, name='ver_citas_cliente'),
+
+    # VISTA ADMIN
+    path('editar_cliente/<int:pk>/', views.editar_cliente, name='editar_cliente'),
+    path('agendar_cita_admin/', views.agendar_cita_admin, name='agendar_cita_admin'),
+    path('vista_administracion/', views.vista_administracion, name='vista_administracion'),
+    path('clientes_admin/', views.clientes_admin, name='clientes_admin'),
+
+    # RESERVAS
     path('reservas/<int:pk>/', views.reserva_detalle, name='reserva_detalle'),
     path('reservas/<int:pk>/editar/', views.reserva_editar, name='reserva_editar'),
     path('reservas/<int:pk>/eliminar/', views.reserva_eliminar, name='reserva_eliminar'),
-    path('vista_administracion/', views.vista_administracion, name='vista_administracion'),
-    path('agendar_cita_admin/', views.agendar_cita_admin, name='agendar_cita_admin'),
-    path('clientes_admin/', views.clientes_admin, name='clientes_admin'),
+
+    # PROFESIONALES
     path('profesionales_admin/', views.profesionales_admin, name='profesionales_admin'),
     path('profesionales_admin/crear/', views.profesional_crear, name='profesional_crear'),
     path('roles_admin/crear/', views.rol_crear, name='rol_crear'),
+    path('profesionales_admin/<int:pk>/editar/', views.profesionales_editar, name='profesionales_editar'),
+    path('profesionales_admin/<int:pk>/eliminar/', views.profesional_eliminar, name='profesionales_eliminar'),
+
+   # SERVICIOS
     path('servicios_admin/', views.servicios_admin, name='servicios_admin'),
     path('servicios_admin/crear/', views.servicio_crear, name='servicio_crear'),
     path('servicios_admin/<int:pk>/editar/', views.servicio_editar, name='servicio_editar'),
     path('servicios_admin/<int:pk>/eliminar/', views.servicio_eliminar, name='servicio_eliminar'),
+
+    # CATEGORIAS
     path('categorias_servicio/crear/', views.categoria_servicio_crear, name='categoria_servicio_crear'),
+
+    # ETIQUETAS
     path('etiquetas_admin/', views.etiquetas_admin, name='etiquetas_admin'),
+    path('etiquetas_admin/<int:pk>/editar/', views.etiqueta_editar, name='etiqueta_editar'),
+    path('etiquetas_admin/<int:pk>/eliminar/', views.etiqueta_eliminar, name='etiqueta_eliminar'),
+
+    # NOTIFICACIONES
     path('notificaciones_admin/', views.notificaciones_admin, name='notificaciones_admin'),
+
+    # AUDITORIA
     path('auditoria_admin/', views.auditoria_admin, name='auditoria_admin'),
+
     path('configuracion_admin/', views.configuracion_admin, name='configuracion_admin'),
+
+    # ACCESO
     path('acceso_denegado/', views.acceso_denegado, name='acceso_denegado'),
     path('acceso/', views.acceso, name='acceso'),
     path('login/', views.login_view, name='login'),
@@ -50,5 +74,4 @@ urlpatterns = [
     path('login_cliente/', views.login_cliente, name='login_cliente'),
     path('registro_cliente/', views.registro_cliente, name='registro_cliente'),
     path('mi_cuenta/', views.mi_cuenta, name='mi_cuenta'),
-
 ]

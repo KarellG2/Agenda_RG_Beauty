@@ -30,6 +30,8 @@
                         <p class="service-category">{{ profesional.id_rol.nombre_rol }}</p>
                         <p class="service-description">{{ profesional.credenciales }}</p>
                         <p>{{ profesional.años_experiencia }} años de experiencia</p>
+                        <a class="btn btn-nav" href="{% url 'profesionales_editar' profesional.id_personal %}">Editar</a>
+                        <a class="btn btn-nav" href="{% url 'profesionales_eliminar' profesional.id_personal %}">Eliminar</a>
                     </article>
                 {% endfor %}
             </div>

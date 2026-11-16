@@ -1,0 +1,28 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Editar Etiqueta | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="etiquetas" %}
+{% endblock %}
+
+{% block content %}
+
+<h1>Editar Etiqueta</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">
+        Guardar Cambios
+    </button>
+    <button type="button" onclick="window.history.back();">
+        Cancelar
+    </button>
+</form>
+
+{% endblock %}

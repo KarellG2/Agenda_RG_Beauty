@@ -133,6 +133,27 @@ class ServicioAdminTests(TestCase):
         self.assertContains(response, 'Profesionales')
         self.assertContains(response, 'Profesional a cargo')
         self.assertContains(response, 'Crear profesional')
+        self.assertContains(
+            response,
+            f'href="{reverse("profesionales_editar", args=[self.personal.pk])}"',
+        )
+
+    def test_eliminar_profesional_pide_confirmacion(self):
+        response = self.client.get(
+            reverse('profesionales_eliminar', args=[self.personal.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '¿Deseas eliminar este profesional?')
+        self.assertTrue(Personal.objects.filter(pk=self.personal.pk).exists())
+
+    def test_eliminar_profesional_ocurre_al_confirmar(self):
+        response = self.client.post(
+            reverse('profesionales_eliminar', args=[self.personal.pk]),
+        )
+
+        self.assertRedirects(response, reverse('profesionales_admin'))
+        self.assertFalse(Personal.objects.filter(pk=self.personal.pk).exists())
 
     def test_crear_servicio_sin_asignacion_no_lo_guarda(self):
         response = self.client.post(reverse('servicio_crear'), {

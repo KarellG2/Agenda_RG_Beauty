@@ -43,6 +43,8 @@
                     <span class="admin-tag-swatch" style="--tag-color: {{ etiqueta.color }}" aria-hidden="true"></span>
                     <span>{{ etiqueta.nombre }}</span>
                     <code>{{ etiqueta.color }}</code>
+                    <a class="btn btn-nav" href="{% url 'etiqueta_editar' etiqueta.pk %}">Editar</a>
+                    <a class="btn btn-nav" href="{% url 'etiqueta_eliminar' etiqueta.pk %}">Eliminar</a>
                 </div>
             {% empty %}
                 <p>Aún no hay etiquetas. Crea una para que aparezca en el formulario de reserva.</p>

@@ -490,3 +490,25 @@ class ClienteUpdateForm(forms.ModelForm):
         if Cliente.objects.filter(telefono=telefono).exclude(pk=self.instance.pk).exists():
             raise ValidationError('Este teléfono ya está en uso')
         return telefono
+
+class PersonalUpdateForm(PersonalForm):
+    class Meta:
+        model = Personal
+        fields = [
+            'nombre',
+            'credenciales',
+            'años_experiencia',
+            'id_rol',
+        ]
+        labels = {
+        'nombre': 'Ingrese el nombre del profesional',
+        'credenciales': 'Ingrese las credenciales del profesional',
+        'años_experiencia': 'Ingrese los años de experiencia',
+        'id_rol': 'Seleccione el rol del profesional',
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'credenciales': forms.TextInput(attrs={'class': 'form-control'}),
+            'años_experiencia': forms.NumberInput(attrs={'class': 'form-control'}),
+            'id_rol': forms.Select(attrs={'class': 'form-control'}),
+        }

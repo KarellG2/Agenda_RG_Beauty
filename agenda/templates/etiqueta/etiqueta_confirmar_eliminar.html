@@ -1,0 +1,29 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Eliminar etiqueta | RG Beauty{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'servicios.css' %}">
+{% endblock %}
+
+{% block topbar %}
+{% include "admin_navbar.html" with active_page="etiquetas" %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-section-page services-page">
+    <section class="admin-card" aria-labelledby="delete-tag-title">
+        <h1 id="delete-tag-title">¿Deseas eliminar esta etiqueta?</h1>
+        <p>{{ etiqueta.nombre }}</p>
+        <p>Esta acción no se puede deshacer.</p>
+        <div class="service-form-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="danger-btn">Sí, eliminar etiqueta</button>
+            </form>
+            <a class="btn-outline" href="{% url 'etiquetas_admin' %}">Cancelar</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

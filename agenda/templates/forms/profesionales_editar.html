@@ -1,0 +1,13 @@
+{% extends "base_template.html" %}
+{% load static %}
+{% block title %}Editar Profesional | RG Beauty{% endblock %}
+
+
+{% block content %}
+    <h1>Editar Profesional</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar cambios</button>
+    </form>
+{% endblock %}

@@ -37,6 +37,11 @@
                         <p class="service-assignment">
                             {{ cliente.cantidad_reservas }} reserva{{ cliente.cantidad_reservas|pluralize:"s" }}
                         </p>
+
+                        <div class="service-actions">
+                            <a href="{% url 'editar_cliente' cliente.pk %}" class="btn-outline" type="button" >Editar</a>
+                        </div>
+
                     </article>
                 {% endfor %}
             </div>

@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="cliente-page citas-cliente">
+<div class="container cliente-page citas-cliente">
     <header class="cliente-page-heading">
         <p class="cliente-eyebrow">Tus momentos</p>
         <h1>Mis citas</h1>
@@ -21,40 +21,44 @@
             <h2 id="proximas-citas-title">
                 Próximas citas
             </h2>
-            <form class="filters-grid" method="get" style="margin-bottom: 20px;">
-                <div class="filter-field">
-                    <label for="search-q">Buscar (profesional o servicio)</label>
-                    <input id="search-q" name="q" type="search" value="{{ q }}" placeholder="Ej: Manicure o Ana">
+
+            <form class="row g-3 align-items-end filters-grid" method="get" style="margin-bottom: 20px;">
+                <div class="col-12 col-md-5 col-lg-12 filter-field">
+                    <label for="search-q" class="form-label">Buscar (profesional o servicio)</label>
+                    <input id="search-q" name="q" type="search" class="form-control" value="{{ q }}" placeholder="Ej: Manicure o Ana">
                 </div>
-                <div class="filter-field">
-                    <label for="filter-servicio">Filtrar por servicio</label>
-                    <select id="filter-servicio" name="servicio">
+                
+                <div class="col-12 col-md-6 col-lg-12 filter-field">
+                    <label for="filter-servicio" class="form-label">Filtrar por servicio</label>
+                    <select id="filter-servicio" name="servicio" class="form-select">
                         <option value="">Todos los servicios</option>
                         {% for s in servicios %}
                             <option value="{{ s.pk }}" {% if servicio_id == s.pk|stringformat:'s' %}selected{% endif %}>{{ s.nombre_s }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="filter-actions">
+
+                <div class="col-12 col-md-3 col-lg-3 filter-actions d-flex gap-2">
                     <button type="submit" class="filter-submit">Aplicar</button>
                     <a href="{% url 'ver_citas_cliente' %}" class="btn-outline" style="padding: 10px 15px; display: inline-block;">Limpiar</a>
                 </div>
             </form>
+
             {% if citas %}
 
-                <div class="citas-table-wrap">
+                <div class="table-responsive-lg citas-table-wrap">
 
-                    <table class="citas-table">
+                    <table class="table align-middle citas-table">
 
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Correo</th>
-                                <th>Teléfono</th>
+                                <th class="d-none d-lg-table-cell">Correo</th>
+                                <th class="d-none d-md-table-cell">Teléfono</th>
                                 <th>Fecha</th>
                                 <th>Hora</th>
                                 <th>Servicio</th>
-                                <th>Etiquetas</th>
+                                <th class="d-none d-lg-table-cell">Etiquetas</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -69,11 +73,11 @@
                                         {{ cita.id_cliente.nombre_c }}
                                     </td>
 
-                                    <td>
+                                    <td class="d-none d-lg-table-cell">
                                         {{ cita.id_cliente.correo }}
                                     </td>
 
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         {{ cita.id_cliente.telefono }}
                                     </td>
 
@@ -89,7 +93,7 @@
                                         {{ cita.id_personal_servicio.id_servicio.nombre_s }}
                                     </td>
 
-                                    <td>
+                                    <td class="d-none d-lg-table-cell">
                                         {% for etiqueta in cita.etiquetas.all %}
                                             <span class="appointment-tag" style="--tag-color: {{ etiqueta.color }}">{{ etiqueta.nombre }}</span>
                                         {% empty %}
@@ -103,7 +107,8 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="reserva-list-actions">
+
+                                        <div class="d-flex flex-column flex-md-row gap-1 reserva-list-actions">
                                             <a class="btn-outline" href="{% url 'reserva_detalle' cita.pk %}">Detalle</a>
                                             <a class="btn-outline" href="{% url 'reserva_editar' cita.pk %}">Editar</a>
                                             <a class="btn-outline" href="{% url 'reserva_eliminar' cita.pk %}">Eliminar</a>
@@ -119,22 +124,29 @@
 
                 </div>
                 
-                <div class="pagination">
+                <div class="pagination mt-3">
                     <span class="steps">
                         {% if citas.has_previous %}
-                        <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">&laquo; primera</a>
-                        <a href="?page={{ citas.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-nav">anterior</a>
+                        <a href="?page=1{% if q %}&q={{ q|urlencode }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id|urlencode }}{% endif %}" class="btn btn-nav">&laquo;
+                            primera
+                        </a>
+                        <a href="?page={{ citas.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id|urlencode }}{% endif %}" class="btn btn-nav">
+                            anterior
+                        </a>
                         {% endif %}
                         <span class="current">
                             página {{ citas.number }} de {{ citas.paginator.num_pages }}.
                         </span>
                         
                         {% if citas.has_next %}
-                            <a href="?page={{ citas.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id }}{% endif %}" class="btn btn-nav">siguiente</a>
-                            <a href="?page={{ citas.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id }}{% endif %}" class="btn btn-nav">última &raquo;</a>
-                        
+                            <a href="?page={{ citas.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id|urlencode }}{% endif %}" class="btn btn-nav">
+                                siguiente
+                            </a>
+                            <a href="?page={{ citas.paginator.num_pages }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if servicio_id %}&servicio={{ servicio_id|urlencode }}{% endif %}" class="btn btn-nav">
+                                última &raquo;
+                            </a>
                         {% endif %}
-
+                    </span>
                 </div>
 
             {% else %}
@@ -143,8 +155,7 @@
                     <h3>Aún no tienes citas.</h3>
                     <p>Agenda tu próximo momento de bienestar.</p>
 
-                    <a href="{% url 'agendar_cita' %}"
-                       class="btn btn-primary">
+                    <a href="{% url 'agendar_cita' %}" class="btn btn-primary">
                         Agendar cita
                     </a>
                 </div>
@@ -152,10 +163,10 @@
             {% endif %}
         </section>
 
-        <section aria-labelledby="anteriores-citas-title">
+        <section aria-labelledby="anteriores-citas-title" class="mt-4">
             <h2 id="anteriores-citas-title">Anteriores y canceladas</h2>
             <div class="cliente-panel cita-empty-state">Todavía no hay citas anteriores.</div>
         </section>
     </div>
 </div>
-{% endblock %}      
+{% endblock %}

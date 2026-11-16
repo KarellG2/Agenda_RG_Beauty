@@ -174,7 +174,6 @@ def reserva_editar(request, pk):
         'es_admin': es_admin,
     })
 
-
 def reserva_eliminar(request, pk):
     reserva, respuesta = _reserva_permitida(request, pk)
     if respuesta:
@@ -191,7 +190,6 @@ def reserva_eliminar(request, pk):
     return redirect(
         'agendar_cita_admin' if request.user.is_staff else 'ver_citas_cliente'
     )
-
 
 def agendar_cita(request):
     cliente = None
@@ -302,12 +300,11 @@ def agendar_cita(request):
     else:
         form = ReservaForm(cliente=cliente)
     return render(request, 'agendar_cita_cliente.html', {'form': form})
-#VISTA ADMINISTRACION
 
+#VISTA ADMINISTRACION
 
 def ver_citas(request):
     return render(request, 'ver_citas_cliente.html')
-
 
 @user_passes_test(es_staff, login_url='login')
 def vista_administracion(request):
@@ -330,7 +327,6 @@ def vista_administracion(request):
         'servicios_registrados': Servicio.objects.count(),
         'tasa_cancelacion': tasa_cancelacion,
     })
-
 
 @user_passes_test(es_staff, login_url='login')
 def agendar_cita_admin(request):
@@ -429,7 +425,6 @@ def agendar_cita_admin(request):
         'estados': estados,
     })
 
-
 @user_passes_test(es_staff, login_url='login')
 def clientes_admin(request):
     query = request.GET.get('q')
@@ -451,7 +446,6 @@ def clientes_admin(request):
 
     return render(request, 'clientes_admin.html', {'clientes': page_obj})
 
-
 @user_passes_test(es_staff, login_url='login')
 def servicios_admin(request):
     servicios = Servicio.objects.select_related('categoria').annotate(
@@ -467,7 +461,6 @@ def servicios_admin(request):
 
     return render(request, 'servicios_admin.html', {'servicios': page_obj})
 
-
 @user_passes_test(es_staff, login_url='login')
 def profesionales_admin(request):
     profesionales = Personal.objects.select_related('id_rol').order_by('nombre')
@@ -477,7 +470,6 @@ def profesionales_admin(request):
     return render(request, 'profesionales_admin.html', {
         'profesionales': page_obj,
     })
-
 
 @user_passes_test(es_staff, login_url='login')
 def profesional_crear(request):
@@ -498,6 +490,46 @@ def profesional_crear(request):
         'accion': 'Guardar profesional',
     })
 
+@user_passes_test(es_staff, login_url='login')
+def profesionales_editar(request, pk):
+    profesional = get_object_or_404(Personal, pk=pk)
+    if request.method == 'POST':
+        form = PersonalUpdateForm(request.POST, instance= profesional)
+        if form.is_valid():
+            with transaction.atomic():
+                profesional = form.save()
+            messages.success(request, 'El profesional se actualizó correctamente.')
+            return redirect('profesionales_admin')
+    else:
+        form = PersonalUpdateForm(instance = profesional)
+    return render(request, 'personal_form.html', {
+        'form': form,
+        'titulo': 'Editar profesional',
+        'accion': 'Guardar cambios',
+    })
+
+@user_passes_test(es_staff, login_url='login')
+def profesional_eliminar(request, pk):
+    profesional = get_object_or_404(Personal, pk=pk)
+    if request.method == 'GET':
+        return render(request, 'forms/profesionales_eliminar.html', {
+            'profesional': profesional,
+        })
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['GET', 'POST'])
+
+    try:
+        profesional.delete()
+    except ProtectedError:
+        messages.error(
+            request,
+            'No se puede eliminar este profesional porque tiene reservas asociadas.'
+            ' Primero gestiona o elimina esas reservas.',
+        )
+    else:
+        messages.success(request, 'El profesional se eliminó correctamente.')
+    return redirect('profesionales_admin')
+
 
 @user_passes_test(es_staff, login_url='login')
 def rol_crear(request):
@@ -513,7 +545,6 @@ def rol_crear(request):
     else:
         form = RolForm()
     return render(request, 'rol_form.html', {'form': form})
-
 
 @user_passes_test(es_staff, login_url='login')
 def servicio_crear(request):
@@ -533,7 +564,6 @@ def servicio_crear(request):
         'accion': 'Crear servicio',
     })
 
-
 @user_passes_test(es_staff, login_url='login')
 def servicio_editar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
@@ -552,8 +582,21 @@ def servicio_editar(request, pk):
         'titulo': 'Editar servicio',
         'accion': 'Guardar cambios',
         'servicio': servicio,
-    })
+        })
 
+@user_passes_test(es_staff, login_url='login')
+def editar_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        form = ClienteUpdateForm(request.POST, instance=cliente)
+        if form.is_valid():
+            with transaction.atomic():
+                cliente = form.save()
+            messages.success(request, 'El cliente se actualizó correctamente.')
+            return redirect('clientes_admin')
+    else:
+        form = ClienteUpdateForm(instance=cliente)
+    return render(request, 'forms/editar_clientes.html', {'form': form, 'cliente': cliente})
 
 @user_passes_test(es_staff, login_url='login')
 @require_POST
@@ -608,6 +651,34 @@ def etiquetas_admin(request):
         'etiquetas': Etiqueta.objects.order_by('nombre'),
     })
 
+@user_passes_test(es_staff, login_url='login')
+def etiqueta_editar(request, pk):
+    etiqueta = get_object_or_404(Etiqueta, pk=pk)
+    if request.method == 'POST':
+        form = EtiquetaForm(request.POST, instance=etiqueta)
+        if form.is_valid():
+            with transaction.atomic():
+                etiqueta = form.save()
+            messages.success(request, 'La etiqueta se actualizó correctamente.')
+            return redirect('etiquetas_admin')
+    else:
+        form = EtiquetaForm(instance=etiqueta)
+    return render(request, 'etiqueta/etiquetas_editar.html', {'form': form, 'etiqueta': etiqueta})
+
+
+@user_passes_test(es_staff, login_url='login')
+def etiqueta_eliminar(request, pk):
+    etiqueta = get_object_or_404(Etiqueta, pk=pk)
+    if request.method == 'GET':
+        return render(request, 'etiqueta/etiqueta_confirmar_eliminar.html', {
+            'etiqueta': etiqueta,
+        })
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['GET', 'POST'])
+
+    etiqueta.delete()
+    messages.success(request, 'La etiqueta se eliminó correctamente.')
+    return redirect('etiquetas_admin')
 
 @user_passes_test(es_staff, login_url='login')
 def notificaciones_admin(request):
