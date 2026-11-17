@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import *
@@ -193,12 +195,19 @@ class RolForm(forms.ModelForm):
 class PersonalForm(forms.ModelForm):
     class Meta:
         model = Personal
-        fields = ['nombre', 'credenciales', 'años_experiencia', 'id_rol']
+        fields = ['nombre', 'credenciales', 'años_experiencia', 'id_rol', 'password']
         labels = {
             'nombre': 'Nombre del profesional',
             'credenciales': 'Credenciales o formación',
             'años_experiencia': 'Años de experiencia',
             'id_rol': 'Cargo o especialidad',
+            'password': 'Contraseña',
+        }
+        help_texts = {
+            'password': (
+                'Debe tener al menos 8 caracteres, una mayúscula, '
+                'un número y un carácter especial.'
+            ),
         }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'admin-field'}),
@@ -208,6 +217,7 @@ class PersonalForm(forms.ModelForm):
                 'min': 0,
             }),
             'id_rol': forms.Select(attrs={'class': 'admin-field'}),
+            'password': forms.PasswordInput(attrs={'class': 'admin-field'}),
         }
         error_messages = {
             'nombre': {'required': 'Ingresa el nombre del profesional.'},
@@ -228,6 +238,10 @@ class PersonalForm(forms.ModelForm):
         nombre = self.cleaned_data['nombre'].strip()
         if not nombre:
             raise ValidationError('Ingresa el nombre del profesional.')
+        if get_user_model().objects.filter(username__iexact=nombre).exists():
+            raise ValidationError(
+                'Ya existe un usuario con ese nombre. Ingresa otro nombre.'
+            )
         return nombre
 
     def clean_credenciales(self):
@@ -235,6 +249,11 @@ class PersonalForm(forms.ModelForm):
         if not credenciales:
             raise ValidationError('Ingresa sus credenciales o formación.')
         return credenciales
+
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        validate_password(password)
+        return password
 
 
 class EtiquetaForm(forms.ModelForm):

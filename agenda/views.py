@@ -17,8 +17,8 @@ from django.db.models import Count, Max, Min, Q
 from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 from .models import *
+from .utility import registrar_accion
 
 from django.core.paginator import Paginator
 
@@ -167,6 +167,11 @@ def reserva_editar(request, pk):
                 reserva.id_personal = reserva.id_personal_servicio.id_personal
                 reserva.save()
                 form.save_m2m()
+            if request.user.is_staff:
+                registrar_accion(
+                    request.user,
+                    f'Se actualizó la reserva #{reserva.pk}.',
+                )
             messages.success(request, 'La reserva se actualizó correctamente.')
             return redirect('reserva_detalle', pk=reserva.pk)
     elif request.method == 'GET':
@@ -191,7 +196,13 @@ def reserva_eliminar(request, pk):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['GET', 'POST'])
 
+    reserva_id = reserva.pk
     reserva.delete()
+    if request.user.is_staff:
+        registrar_accion(
+            request.user,
+            f'Se eliminó la reserva #{reserva_id}.',
+        )
     messages.success(request, 'La reserva se eliminó correctamente.')
     return redirect(
         'agendar_cita_admin' if request.user.is_staff else 'ver_citas_cliente'
@@ -291,6 +302,11 @@ def agendar_cita(request):
                 reserva.save()
                 form.save_m2m()
 
+            if request.user.is_staff:
+                registrar_accion(
+                    request.user,
+                    f'Se creó la reserva #{reserva.pk}.',
+                )
             if nuevo_usuario and not request.user.is_authenticated:
                 login(
                     request,
@@ -482,7 +498,21 @@ def profesional_crear(request):
     if request.method == 'POST':
         form = PersonalForm(request.POST)
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                personal = form.save(commit=False)
+                usuario = get_user_model()(
+                    username=personal.nombre,
+                    is_staff=True,
+                )
+                usuario.set_password(form.cleaned_data['password'])
+                usuario.save()
+                personal.usuario = usuario
+                personal.password = usuario.password
+                personal.save()
+            registrar_accion(
+                request.user,
+                f'Se creó el profesional "{personal.nombre}".',
+            )
             messages.success(
                 request,
                 'El profesional se creó correctamente y ya puede asignarse a un servicio.',
@@ -504,6 +534,10 @@ def profesionales_editar(request, pk):
         if form.is_valid():
             with transaction.atomic():
                 profesional = form.save()
+            registrar_accion(
+                request.user,
+                f'Se actualizó el profesional "{profesional.nombre}".',
+            )
             messages.success(request, 'El profesional se actualizó correctamente.')
             return redirect('profesionales_admin')
     else:
@@ -524,16 +558,27 @@ def profesional_eliminar(request, pk):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['GET', 'POST'])
 
-    try:
-        profesional.delete()
-    except ProtectedError:
+    if Reserva.objects.filter(id_personal=profesional).exists():
         messages.error(
             request,
-            'No se puede eliminar este profesional porque tiene reservas asociadas.'
-            ' Primero gestiona o elimina esas reservas.',
+            'No se puede eliminar este profesional porque tiene reservas asociadas. '
+            'Primero gestiona o elimina esas reservas.',
         )
-    else:
-        messages.success(request, 'El profesional se eliminó correctamente.')
+        return redirect('profesionales_admin')
+
+    nombre_profesional = profesional.nombre
+    with transaction.atomic():
+        ServicioPersonal.objects.filter(id_personal=profesional).delete()
+        RegistrosAuditoria.objects.filter(
+            id_personal=profesional,
+        ).update(id_personal=None)
+        profesional.delete()
+
+    messages.success(request, 'El profesional se eliminó correctamente.')
+    registrar_accion(
+        request.user,
+        f'Se eliminó el profesional "{nombre_profesional}".',
+    )
     return redirect('profesionales_admin')
 
 
@@ -542,7 +587,11 @@ def rol_crear(request):
     if request.method == 'POST':
         form = RolForm(request.POST)
         if form.is_valid():
-            form.save()
+            rol = form.save()
+            registrar_accion(
+                request.user,
+                f'Se creó el rol "{rol.nombre_rol}".',
+            )
             messages.success(
                 request,
                 'El cargo o especialidad se creó. Ahora puedes registrar al profesional.',
@@ -560,6 +609,10 @@ def servicio_crear(request):
             with transaction.atomic():
                 servicio = form.save()
                 form.save_asignacion(servicio)
+            registrar_accion(
+                request.user,
+                f'Se creó el servicio "{servicio.nombre_s}".',
+            )
             messages.success(request, 'El servicio se creó correctamente.')
             return redirect('servicios_admin')
     else:
@@ -579,6 +632,10 @@ def servicio_editar(request, pk):
             with transaction.atomic():
                 servicio = form.save()
                 form.save_asignacion(servicio)
+            registrar_accion(
+                request.user,
+                f'Se actualizó el servicio "{servicio.nombre_s}".',
+            )
             messages.success(request, 'El servicio se actualizó correctamente.')
             return redirect('servicios_admin')
     else:
@@ -598,6 +655,10 @@ def editar_cliente(request, pk):
         if form.is_valid():
             with transaction.atomic():
                 cliente = form.save()
+            registrar_accion(
+                request.user,
+                f'Se actualizó el cliente "{cliente.nombre_c}".',
+            )
             messages.success(request, 'El cliente se actualizó correctamente.')
             return redirect('clientes_admin')
     else:
@@ -605,9 +666,14 @@ def editar_cliente(request, pk):
     return render(request, 'forms/editar_clientes.html', {'form': form, 'cliente': cliente})
 
 @user_passes_test(es_staff, login_url='login')
-@require_POST
 def servicio_eliminar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
+    if request.method == 'GET':
+        return render(request, 'forms/servicio_eliminar.html', {
+            'servicio': servicio,
+        })
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['GET', 'POST'])
     try:
         servicio.delete()
     except ProtectedError:
@@ -617,6 +683,10 @@ def servicio_eliminar(request, pk):
             'Primero gestiona o elimina esas reservas.',
         )
     else:
+        registrar_accion(
+            request.user,
+            f'Se eliminó el servicio "{servicio.nombre_s}".',
+        )
         messages.success(request, 'El servicio se eliminó correctamente.')
     return redirect('servicios_admin')
 
@@ -626,7 +696,11 @@ def categoria_servicio_crear(request):
     if request.method == 'POST':
         form = CategoriaServicioForm(request.POST)
         if form.is_valid():
-            form.save()
+            categoria = form.save()
+            registrar_accion(
+                request.user,
+                f'Se creó la categoría "{categoria.nombre}".',
+            )
             messages.success(
                 request,
                 'La categoría se creó correctamente. Ya puedes asignarla al servicio.',
@@ -644,7 +718,11 @@ def etiquetas_admin(request):
     if request.method == 'POST':
         form = EtiquetaForm(request.POST)
         if form.is_valid():
-            form.save()
+            etiqueta = form.save()
+            registrar_accion(
+                request.user,
+                f'Se creó la etiqueta "{etiqueta.nombre}".',
+            )
             messages.success(
                 request,
                 'La etiqueta se creó correctamente y ya está disponible para las reservas.',
@@ -665,6 +743,10 @@ def etiqueta_editar(request, pk):
         if form.is_valid():
             with transaction.atomic():
                 etiqueta = form.save()
+            registrar_accion(
+                request.user,
+                f'Se actualizó la etiqueta "{etiqueta.nombre}".',
+            )
             messages.success(request, 'La etiqueta se actualizó correctamente.')
             return redirect('etiquetas_admin')
     else:
@@ -682,7 +764,13 @@ def etiqueta_eliminar(request, pk):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['GET', 'POST'])
 
+    nombre_etiqueta = etiqueta.nombre
     etiqueta.delete()
+    registrar_accion(
+        request.user,
+        f'Se eliminó la etiqueta "{nombre_etiqueta}".',
+    )
+
     messages.success(request, 'La etiqueta se eliminó correctamente.')
     return redirect('etiquetas_admin')
 
@@ -703,7 +791,14 @@ def notificaciones_admin(request):
 
 @user_passes_test(es_staff, login_url='login')
 def auditoria_admin(request):
-    return render(request, 'auditoria_admin.html')
+    auditoria = RegistrosAuditoria.objects.order_by('-fecha').select_related('id_personal')
+    paginator = Paginator(auditoria, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'auditoria_admin.html', {
+        'registros_auditoria': page_obj,
+    })
+
 
 
 @user_passes_test(es_staff, login_url='login')
@@ -782,7 +877,6 @@ def login_cliente(request):
     else:
         form = AutenticacionClienteForm()
     return render(request, 'login_cliente.html', {'form': form})
-
 
 def registro_cliente(request):
     return redirect('login_cliente')

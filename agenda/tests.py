@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from .forms import PersonalForm
 from .models import (
     Cliente,
     CategoriaServicio,
@@ -13,6 +14,7 @@ from .models import (
     Personal,
     Notificacion,
     Reserva,
+    RegistrosAuditoria,
     Rol,
     Servicio,
     ServicioPersonal,
@@ -85,12 +87,33 @@ class ServicioAdminTests(TestCase):
             'credenciales': 'Técnica en uñas',
             'años_experiencia': 4,
             'id_rol': self.personal.id_rol_id,
+            'password': 'Profesional!23',
         })
 
         self.assertRedirects(response, reverse('servicio_crear'))
         profesional = Personal.objects.get(nombre='Nueva profesional')
         self.assertEqual(profesional.credenciales, 'Técnica en uñas')
         self.assertEqual(profesional.años_experiencia, 4)
+        self.assertIsNotNone(profesional.usuario)
+        self.assertTrue(
+            profesional.usuario.check_password('Profesional!23')
+        )
+        self.client.logout()
+        login_response = self.client.post(reverse('login'), {
+            'nombre': 'Nueva profesional',
+            'password': 'Profesional!23',
+        })
+        self.assertRedirects(login_response, reverse('agendar_cita_admin'))
+        self.client.post(reverse('rol_crear'), {
+            'nombre_rol': 'Rol auditado',
+            'descripcion': 'Acción registrada.',
+        })
+        self.assertTrue(
+            RegistrosAuditoria.objects.filter(
+                accion='Se creó el rol "Rol auditado".',
+                id_personal=profesional,
+            ).exists()
+        )
         formulario_servicio = self.client.get(reverse('servicio_crear'))
         self.assertContains(formulario_servicio, 'Nueva profesional')
 
@@ -107,6 +130,7 @@ class ServicioAdminTests(TestCase):
             'credenciales': 'Certificación en cosmetología',
             'años_experiencia': 2,
             'id_rol': rol.pk,
+            'password': 'Cosmetologa!23',
         })
 
         self.assertRedirects(response_profesional, reverse('servicio_crear'))
@@ -155,6 +179,44 @@ class ServicioAdminTests(TestCase):
 
         self.assertRedirects(response, reverse('profesionales_admin'))
         self.assertFalse(Personal.objects.filter(pk=self.personal.pk).exists())
+
+    def test_eliminar_profesional_sin_reservas_elimina_asignaciones(self):
+        servicio = Servicio.objects.create(
+            nombre_s='Servicio asignado',
+            descripcion='Servicio de prueba',
+        )
+        asignacion = ServicioPersonal.objects.create(
+            id_personal=self.personal,
+            id_servicio=servicio,
+            duracion_aproximada=30,
+            precio=18000,
+        )
+
+        response = self.client.post(
+            reverse('profesionales_eliminar', args=[self.personal.pk]),
+        )
+
+        self.assertRedirects(response, reverse('profesionales_admin'))
+        self.assertFalse(Personal.objects.filter(pk=self.personal.pk).exists())
+        self.assertFalse(
+            ServicioPersonal.objects.filter(pk=asignacion.pk).exists()
+        )
+        self.assertTrue(Servicio.objects.filter(pk=servicio.pk).exists())
+
+    def test_eliminar_profesional_con_auditoria_conserva_el_historial(self):
+        registro = RegistrosAuditoria.objects.create(
+            accion='Acción histórica',
+            id_personal=self.personal,
+        )
+
+        response = self.client.post(
+            reverse('profesionales_eliminar', args=[self.personal.pk]),
+        )
+
+        self.assertRedirects(response, reverse('profesionales_admin'))
+        self.assertFalse(Personal.objects.filter(pk=self.personal.pk).exists())
+        registro.refresh_from_db()
+        self.assertIsNone(registro.id_personal)
 
     def test_crear_servicio_sin_asignacion_no_lo_guarda(self):
         response = self.client.post(reverse('servicio_crear'), {
@@ -402,7 +464,7 @@ class ServicioAdminTests(TestCase):
 
         self.assertContains(response, '$18000 CLP')
 
-    def test_eliminar_servicio_solo_acepta_post(self):
+    def test_eliminar_servicio_muestra_confirmacion_en_get(self):
         servicio = Servicio.objects.create(
             nombre_s='Manicure',
             descripcion='Cuidado de uñas',
@@ -412,7 +474,8 @@ class ServicioAdminTests(TestCase):
             reverse('servicio_eliminar', args=[servicio.pk]),
         )
 
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '¿Deseas eliminar este servicio?')
         self.assertTrue(Servicio.objects.filter(pk=servicio.pk).exists())
 
     def test_gestion_de_servicios_requiere_sesion_de_administrador(self):
@@ -1096,3 +1159,16 @@ class PasswordRequirementsTests(TestCase):
                 with self.assertRaises(ValidationError) as error:
                     self.validator.validate(password)
                 self.assertIn(expected_message, str(error.exception))
+
+    def test_formulario_de_profesional_aplica_la_validacion(self):
+        rol = Rol.objects.create(nombre_rol='Estilista', descripcion='')
+        form = PersonalForm(data={
+            'nombre': 'Profesional',
+            'credenciales': 'Certificación',
+            'años_experiencia': 2,
+            'id_rol': rol.pk,
+            'password': 'Clave123',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('carácter especial', str(form.errors['password']))

@@ -46,6 +46,7 @@ class Personal(models.Model):
     nombre = models.CharField(max_length=100)
     credenciales = models.CharField(max_length=255)
     años_experiencia = models.PositiveIntegerField()
+    password = models.CharField(max_length=128)
 
     id_rol = models.ForeignKey(
         Rol,
@@ -53,7 +54,14 @@ class Personal(models.Model):
         db_column='id_rol',
         related_name='personal'
     )
-
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete = models.SET_NULL,
+        null = True,
+        blank = True,
+        related_name = 'personal'
+    )
+    
     class Meta:
         db_table = 'personal'
 
@@ -293,18 +301,21 @@ class OficioPersonal(models.Model):
 
 class RegistrosAuditoria(models.Model):
     id_registro = models.AutoField(primary_key=True)
-    accion = models.TextField()
-    fecha = models.DateTimeField()
+    accion = models.TextField(max_length=255)
+    fecha = models.DateTimeField(auto_now_add=True)
 
     id_personal = models.ForeignKey(
         Personal,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         db_column='id_personal',
-        related_name='registros_auditoria'
+        related_name='registros_auditoria',
+        null=True,
+        blank=True,
     )
 
     class Meta:
         db_table = 'registros_auditoria'
+        managed = False
 
     def __str__(self):
         return f"Registro {self.id_registro}"
