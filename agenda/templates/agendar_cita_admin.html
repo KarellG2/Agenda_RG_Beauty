@@ -107,7 +107,9 @@
                     <div class="appointment-actions">
                         <a class="btn-outline" href="{% url 'reserva_detalle' reserva.pk %}">Detalle</a>
                         <a class="btn-outline" href="{% url 'reserva_editar' reserva.pk %}">Editar</a>
-                        <a class="btn-outline" href="{% url 'reserva_eliminar' reserva.pk %}">Eliminar</a>
+                        {% if user.is_staff %}
+                            <a class="btn-outline" href="{% url 'reserva_eliminar' reserva.pk %}">Eliminar</a>
+                        {% endif %}
                     </div>
                 </article>
             {% empty %}

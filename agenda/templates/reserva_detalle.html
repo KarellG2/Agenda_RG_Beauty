@@ -27,7 +27,9 @@
         </dl>
         <div class="reserva-form-actions">
             <a class="primary-btn" href="{% url 'reserva_editar' reserva.pk %}">Editar reserva</a>
-            <a class="btn-outline" href="{% url 'reserva_eliminar' reserva.pk %}">Eliminar reserva</a>
+            {% if user.is_staff %}
+                <a class="btn-outline" href="{% url 'reserva_eliminar' reserva.pk %}">Eliminar reserva</a>
+            {% endif %}
             {% if user.is_staff %}
                 <a class="btn-outline" href="{% url 'agendar_cita_admin' %}">Volver a la agenda</a>
             {% else %}

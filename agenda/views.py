@@ -22,8 +22,18 @@ from .utility import registrar_accion
 
 from django.core.paginator import Paginator
 
-def es_staff(user):
+def es_admin(user):
     return user.is_authenticated and user.is_staff
+
+
+def es_staff(user):
+    return (
+        user.is_authenticated
+        and (
+            user.is_staff
+            or Personal.objects.filter(usuario=user).exists()
+        )
+    )
 
 
 def es_cliente(user):
@@ -186,6 +196,13 @@ def reserva_editar(request, pk):
     })
 
 def reserva_eliminar(request, pk):
+    if (
+        request.user.is_authenticated
+        and not request.user.is_staff
+        and Personal.objects.filter(usuario=request.user).exists()
+    ):
+        return render(request, 'acceso_denegado.html', status=403)
+
     reserva, respuesta = _reserva_permitida(request, pk)
     if respuesta:
         return respuesta
@@ -495,20 +512,36 @@ def profesionales_admin(request):
 
 @user_passes_test(es_staff, login_url='login')
 def profesional_crear(request):
+
+    puede_otorgar_accesos = request.user.is_superuser
+
     if request.method == 'POST':
-        form = PersonalForm(request.POST)
+        form = PersonalForm(
+            request.POST,
+            puede_otorgar_accesos=puede_otorgar_accesos,
+        )
         if form.is_valid():
+            tiene_acceso_admin = (
+                puede_otorgar_accesos
+                and
+                form.cleaned_data.get(
+                    'puede_administrar',
+                    False)
+            )
+
             with transaction.atomic():
                 personal = form.save(commit=False)
                 usuario = get_user_model()(
                     username=personal.nombre,
-                    is_staff=True,
+                    is_staff=tiene_acceso_admin,
                 )
-                usuario.set_password(form.cleaned_data['password'])
-                usuario.save()
-                personal.usuario = usuario
-                personal.password = usuario.password
-                personal.save()
+            usuario.set_password(form.cleaned_data['password'])
+            usuario.save()
+
+            personal.usuario = usuario
+            personal.password = usuario.password
+            personal.save()
+
             registrar_accion(
                 request.user,
                 f'Se creó el profesional "{personal.nombre}".',
@@ -519,7 +552,9 @@ def profesional_crear(request):
             )
             return redirect('servicio_crear')
     else:
-        form = PersonalForm()
+        form = PersonalForm(
+            puede_otorgar_accesos=puede_otorgar_accesos
+        )
     return render(request, 'personal_form.html', {
         'form': form,
         'titulo': 'Crear profesional',
@@ -548,7 +583,7 @@ def profesionales_editar(request, pk):
         'accion': 'Guardar cambios',
     })
 
-@user_passes_test(es_staff, login_url='login')
+@user_passes_test(es_admin, login_url='acceso_denegado')
 def profesional_eliminar(request, pk):
     profesional = get_object_or_404(Personal, pk=pk)
     if request.method == 'GET':
@@ -665,7 +700,7 @@ def editar_cliente(request, pk):
         form = ClienteUpdateForm(instance=cliente)
     return render(request, 'forms/editar_clientes.html', {'form': form, 'cliente': cliente})
 
-@user_passes_test(es_staff, login_url='login')
+@user_passes_test(es_admin, login_url='acceso_denegado')
 def servicio_eliminar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
     if request.method == 'GET':
@@ -754,7 +789,7 @@ def etiqueta_editar(request, pk):
     return render(request, 'etiqueta/etiquetas_editar.html', {'form': form, 'etiqueta': etiqueta})
 
 
-@user_passes_test(es_staff, login_url='login')
+@user_passes_test(es_admin, login_url='acceso_denegado')
 def etiqueta_eliminar(request, pk):
     etiqueta = get_object_or_404(Etiqueta, pk=pk)
     if request.method == 'GET':
@@ -821,7 +856,11 @@ def acceso(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('agendar_cita_admin')
+        if request.user.is_staff:
+            return redirect('agendar_cita_admin')
+        if Personal.objects.filter(usuario=request.user).exists():
+            return redirect('agendar_cita_admin')
+        return redirect('home')
 
     if request.method == 'POST':
         form = AutenticacionForm(request.POST)
@@ -829,11 +868,18 @@ def login_view(request):
             nombre = form.cleaned_data['nombre']
             password = form.cleaned_data['password']
             user = authenticate(request, username=nombre, password=password)
-            if user is not None:
+            if user is not None and user.is_staff:
                 login(request, user)
                 messages.success(request, 'Sesión iniciada correctamente.')
                 return redirect('agendar_cita_admin')
-            messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+            if user is not None and Personal.objects.filter(usuario=user).exists():
+                login(request, user)
+                messages.success(request, 'Sesión iniciada correctamente.')
+                return redirect('agendar_cita_admin')
+            messages.error(
+                request,
+                'Nombre de usuario o contraseña incorrectos.',
+            )
     else:
         form = AutenticacionForm()
     return render(request, 'login_admin.html', {'form': form})

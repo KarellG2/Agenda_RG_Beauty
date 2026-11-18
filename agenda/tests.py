@@ -916,6 +916,80 @@ class AdminLoginRedirectTests(TestCase):
 
         self.assertRedirects(response, reverse('agendar_cita_admin'))
 
+    def test_login_admin_rechaza_usuario_sin_permisos(self):
+        get_user_model().objects.create_user(
+            username='cliente',
+            password='test-password',
+            is_staff=False,
+        )
+
+        response = self.client.post(reverse('login'), {
+            'nombre': 'cliente',
+            'password': 'test-password',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Nombre de usuario o contraseña incorrectos.',
+        )
+        self.assertFalse(
+            get_user_model().objects.get(username='cliente').is_staff
+        )
+
+    def test_login_profesional_sin_permisos_redirige_al_panel(self):
+        rol = Rol.objects.create(
+            nombre_rol='Estilista',
+            descripcion='',
+        )
+        usuario = get_user_model().objects.create_user(
+            username='Profesional',
+            password='test-password',
+            is_staff=False,
+        )
+        Personal.objects.create(
+            nombre='Profesional',
+            credenciales='',
+            años_experiencia=1,
+            id_rol=rol,
+            usuario=usuario,
+        )
+
+        response = self.client.post(reverse('login'), {
+            'nombre': 'Profesional',
+            'password': 'test-password',
+        })
+
+        self.assertRedirects(response, reverse('agendar_cita_admin'))
+
+    def test_profesional_sin_permisos_accede_al_panel_sin_eliminar(self):
+        rol = Rol.objects.create(
+            nombre_rol='Estilista',
+            descripcion='',
+        )
+        usuario = get_user_model().objects.create_user(
+            username='Profesional limitado',
+            password='test-password',
+            is_staff=False,
+        )
+        Personal.objects.create(
+            nombre='Profesional limitado',
+            credenciales='',
+            años_experiencia=1,
+            id_rol=rol,
+            usuario=usuario,
+        )
+        self.client.force_login(usuario)
+
+        panel = self.client.get(reverse('agendar_cita_admin'))
+        self.assertEqual(panel.status_code, 200)
+        self.assertContains(panel, 'Agenda')
+        self.assertNotContains(panel, 'reserva_eliminar')
+
+        eliminado = self.client.post(reverse('servicio_eliminar', args=[1]))
+        self.assertEqual(eliminado.status_code, 302)
+        self.assertIn(reverse('acceso_denegado'), eliminado.url)
+
     def test_enlace_de_administracion_abre_la_agenda(self):
         response = self.client.get(reverse('home'))
 

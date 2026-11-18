@@ -53,10 +53,12 @@
                         </div>
                         <div class="service-actions">
                             <a class="btn-outline" href="{% url 'servicio_editar' servicio.pk %}">Editar</a>
-                            <form method="post" action="{% url 'servicio_eliminar' servicio.pk %}" onsubmit="return confirm('¿Eliminar este servicio?');">
-                                {% csrf_token %}
-                                <button class="btn-outline" type="submit">Eliminar</button>
-                            </form>
+                            {% if user.is_staff %}
+                                <form method="post" action="{% url 'servicio_eliminar' servicio.pk %}" onsubmit="return confirm('¿Eliminar este servicio?');">
+                                    {% csrf_token %}
+                                    <button class="btn-outline" type="submit">Eliminar</button>
+                                </form>
+                            {% endif %}
                         </div>
                     </article>
                 {% endfor %}

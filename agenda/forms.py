@@ -193,6 +193,17 @@ class RolForm(forms.ModelForm):
 
 
 class PersonalForm(forms.ModelForm):
+    puede_administrar = forms.BooleanField(
+        required = False,
+        initial = False,
+        label='Conceder permisos de administrador',
+        help_text=(
+            'Permite que este profesional pueda acceder a '
+            'funciones de administracion del sistema'
+        ),
+        widget = forms.CheckboxInput(attrs={'class':'form-check-input'})
+        )
+
     class Meta:
         model = Personal
         fields = ['nombre', 'credenciales', 'años_experiencia', 'id_rol', 'password']
@@ -230,9 +241,15 @@ class PersonalForm(forms.ModelForm):
             'id_rol': {'required': 'Selecciona un cargo o especialidad.'},
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 *args,
+                 puede_otorgar_accesos=False,
+                 **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields['id_rol'].queryset = Rol.objects.order_by('nombre_rol')
+        if not puede_otorgar_accesos:
+            self.fields.pop('puede_administrar')
 
     def clean_nombre(self):
         nombre = self.cleaned_data['nombre'].strip()
