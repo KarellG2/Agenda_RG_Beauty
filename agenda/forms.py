@@ -496,9 +496,6 @@ class ClienteUpdateForm(forms.ModelForm):
             'telefono': 'Teléfono (también será tu contraseña)',
             'correo': 'Correo electrónico',
         }
-        help_texts = {
-            'telefono': 'Si cambias este número, también cambiará la contraseña con la que inicias sesión.',
-        }
         widgets = {
             'nombre_c': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),

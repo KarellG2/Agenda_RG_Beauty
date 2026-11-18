@@ -909,3 +909,27 @@ def mi_cuenta(request):
     else:
         form = ClienteUpdateForm(instance=cliente)
     return render(request, 'mi_cuenta.html', {'form': form, 'cliente': cliente})
+
+@user_passes_test(es_cliente, login_url='login_cliente')
+def eliminar_cuenta_cliente(request):
+    cliente = get_object_or_404(Cliente, usuario=request.user)
+    if request.method == 'GET':
+        return render(request, 'forms/eliminar_cuenta_cliente.html', {
+            'cliente': cliente,
+        })
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['GET', 'POST'])
+    if Reserva.objects.filter(id_cliente=cliente).exists():
+        messages.error(
+            request,
+            'No se puede eliminar esta cuenta porque tiene reservas asociadas. '
+            'Primero gestiona o elimina esas reservas.',
+        )
+        return redirect('mi_cuenta')
+    
+    with transaction.atomic():
+        if cliente.usuario:
+            cliente.usuario.delete()
+        cliente.delete()
+    messages.success(request, 'La cuenta se eliminó correctamente.')
+    return redirect('home')

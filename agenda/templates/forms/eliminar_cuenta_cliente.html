@@ -1,0 +1,32 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block title %}Eliminar cuenta | RG Beauty{% endblock %}
+
+
+{% block topbar %}
+{% endblock %}
+
+{% block page_styles %}<link rel="stylesheet" href="{% static 'agendar-cliente.css' %}">{% endblock %}
+
+{% block content %}
+<div class="cliente-page agenda-cliente">
+    <header class="cliente-page-heading">
+        <p class="cliente-eyebrow">Gestión de Clientes</p>
+        <h1>Eliminar cuenta</h1>
+    </header>
+    <section class="cliente-panel reserva-panel" aria-labelledby="delete-title">
+        <h2 id="delete-title">¿Desea eliminar su cuenta?</h2>
+        <p>{{ cliente.nombre_c }} - {{ cliente.telefono }}</p>
+        <p>Esta acción no se puede deshacer.</p>
+        <div class="reserva-form-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="danger-btn">Sí, eliminar Cuenta</button>
+            </form>
+            <a class="btn-outline" href="{% url 'mi_cuenta' %}">Cancelar</a>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

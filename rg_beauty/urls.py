@@ -63,7 +63,6 @@ urlpatterns = [
 
     # AUDITORIA
     path('auditoria_admin/', views.auditoria_admin, name='auditoria_admin'),
-
     path('configuracion_admin/', views.configuracion_admin, name='configuracion_admin'),
 
     # ACCESO
@@ -72,6 +71,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('login_cliente/', views.login_cliente, name='login_cliente'),
+    # CLIENTE
     path('registro_cliente/', views.registro_cliente, name='registro_cliente'),
     path('mi_cuenta/', views.mi_cuenta, name='mi_cuenta'),
+    path('eliminar_cuenta_cliente/', views.eliminar_cuenta_cliente, name='eliminar_cuenta_cliente'),
+
 ]

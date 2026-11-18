@@ -17,12 +17,12 @@
     <section aria-labelledby="audit-title">
         <h1 class="admin-section-title" id="audit-title">Auditoría</h1>
 
-        <div class="admin-card audit-exampmle-list" aria-label="Registros de auditoría">
+        <div class="admin-card audit-example-list" aria-label="Registros de auditoría">
             {% if registros_auditoria %}
             {% for registro in registros_auditoria %}
                 <p>
                     {{ registro.accion }}
-                    {% if registro.id_personal %} · {{ registro.id_personal.nombre }}{% endif %} · {{ registro.fecha|date:"d-m-Y, H:i" }}
+                    {% if registro.id_personal %} · {{ registro.id_personal.nombre }}{% else %} · Profesional eliminado{% endif %} · {{ registro.fecha|date:"d-m-Y, H:i" }}
                 </p>
             {% endfor %}
             {% else %}
