@@ -4,7 +4,7 @@ from django.dispatch import receiver
 
 from .models import Personal, Rol
 
-
+#hecho con ia
 @receiver(post_save, sender=get_user_model())
 def crear_personal_para_superusuario(sender, instance, created, **kwargs):
     if not instance.is_superuser:

@@ -21,10 +21,18 @@ from .models import *
 from .utility import registrar_accion
 from django.views.decorators.cache import never_cache
 from django.core.paginator import Paginator
+from functools import wraps
+from django.contrib.auth.views import redirect_to_login
 
 def es_admin(user):
     return user.is_authenticated and user.is_staff
 
+def es_profesional(user):
+    return (
+        user.is_authenticated
+        and not user.is_staff
+        and Personal.objects.filter(usuario=user).exists()
+    )
 
 def es_staff(user):
     return (
@@ -35,6 +43,8 @@ def es_staff(user):
         )
     )
 
+def es_personal(user):
+    return es_admin(user) or es_profesional(user)
 
 def es_cliente(user):
     return (
@@ -43,6 +53,26 @@ def es_cliente(user):
         and Cliente.objects.filter(usuario=user).exists()
     )
 
+# IA
+def es_usuario_reservas(user):
+    # Usuarios que pueden ver la colección general de reservas: administradores y clientes.
+    return es_admin(user) or es_cliente(user)
+
+def es_usuario_reserva(user):
+    # Usuarios autorizados para entrar al detalle o edición de una reserva individual.
+    return es_personal(user) or es_cliente(user)
+
+def requiere_rol(test_func, login_url='login'):
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect_to_login(request.get_full_path(),login_url=login_url)
+            if not test_func(request.user):
+                return render(request, 'acceso_denegado.html', status=403)
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 # Create your views here.
 def home(request):
@@ -139,10 +169,6 @@ def _cliente_actual(request):
 
 
 def _reserva_permitida(request, pk):
-    cliente = _cliente_actual(request)
-    if not request.user.is_staff and cliente is None:
-        return None, redirect('login_cliente')
-
     reserva = get_object_or_404(
         Reserva.objects.select_related(
             'id_cliente',
@@ -152,12 +178,25 @@ def _reserva_permitida(request, pk):
         ).prefetch_related('etiquetas'),
         pk=pk,
     )
-    if not request.user.is_staff and reserva.id_cliente_id != cliente.pk:
+
+    if request.user.is_staff:
+        return reserva, None
+
+    if es_profesional(request.user):
+        personal = Personal.objects.filter(usuario=request.user).first()
+        if personal is None or reserva.id_personal_id != personal.pk:
+            return None, render(request, 'acceso_denegado.html', status=403)
+        return reserva, None
+
+    cliente = _cliente_actual(request)
+    if cliente is None:
+        return None, redirect('login_cliente')
+    if reserva.id_cliente_id != cliente.pk:
         return None, render(request, 'acceso_denegado.html', status=403)
     return reserva, None
 
 @never_cache
-@user_passes_test(es_cliente, login_url='login_cliente')
+@requiere_rol(es_usuario_reserva, login_url='login_cliente')
 def reserva_detalle(request, pk):
     reserva, respuesta = _reserva_permitida(request, pk)
     if respuesta:
@@ -165,7 +204,7 @@ def reserva_detalle(request, pk):
     return render(request, 'reserva_detalle.html', {'reserva': reserva})
 
 @never_cache
-@user_passes_test(es_cliente, login_url='login_cliente')
+@requiere_rol(es_usuario_reserva, login_url='login_cliente')
 def reserva_editar(request, pk):
     reserva, respuesta = _reserva_permitida(request, pk)
     if respuesta:
@@ -200,7 +239,7 @@ def reserva_editar(request, pk):
     })
 
 @never_cache
-@user_passes_test(es_cliente, login_url='login_cliente')
+@requiere_rol(es_usuario_reserva, login_url='login_cliente')
 def reserva_eliminar(request, pk):
     if (
         request.user.is_authenticated
@@ -355,33 +394,56 @@ def ver_citas(request):
     return render(request, 'ver_citas_cliente.html')
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_personal)
 def vista_administracion(request):
     hoy = timezone.localdate()
-    citas_hoy = Reserva.objects.filter(fecha=hoy)
-    total_reservas = Reserva.objects.count()
-    canceladas = Reserva.objects.filter(estado='cancelado').count()
+    reservas = Reserva.objects.all()
+    personal_actual = None
+    if es_profesional(request.user):
+        personal_actual = get_object_or_404(Personal, usuario=request.user)
+        reservas = reservas.filter(id_personal=personal_actual)
+
+    citas_hoy = reservas.filter(fecha=hoy)
+    total_reservas = reservas.count()
+    canceladas = reservas.filter(estado='cancelado').count()
     tasa_cancelacion = (
         round(canceladas * 100 / total_reservas, 1)
         if total_reservas else 0
     )
     return render(request, 'vista_administracion.html', {
         'citas_hoy': citas_hoy.count(),
-        'pendientes': Reserva.objects.filter(estado='pendiente').count(),
-        'confirmadas': Reserva.objects.filter(estado='confirmado').count(),
+        'pendientes': reservas.filter(estado='pendiente').count(),
+        'confirmadas': reservas.filter(estado='confirmado').count(),
         'canceladas': canceladas,
         'total_reservas': total_reservas,
-        'clientes_registrados': Cliente.objects.count(),
-        'profesionales_registrados': Personal.objects.count(),
-        'servicios_registrados': Servicio.objects.count(),
+        'clientes_registrados': (
+            reservas.values('id_cliente').distinct().count()
+            if personal_actual
+            else Cliente.objects.count()
+        ),
+        'profesionales_registrados': (
+            1 if personal_actual
+            else Personal.objects.count()
+        ),
+        'servicios_registrados': (
+            Servicio.objects.filter(
+                personal_asignado__id_personal=personal_actual
+            ).distinct().count()
+            if personal_actual
+            else Servicio.objects.count()
+        ),
         'tasa_cancelacion': tasa_cancelacion,
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_personal)
 def agendar_cita_admin(request):
     hoy = timezone.localdate()
     fecha_param = request.GET.get('fecha')
+    personal_actual = None
+    if es_profesional(request.user):
+        personal_actual = get_object_or_404(Personal, usuario=request.user)
+
     try:
         fecha_seleccionada = (
             date.fromisoformat(fecha_param) if fecha_param else hoy
@@ -404,6 +466,9 @@ def agendar_cita_admin(request):
         'id_personal',
         'id_personal_servicio__id_servicio',
     ).prefetch_related('etiquetas')
+
+    if personal_actual:
+        query = query.filter(id_personal=personal_actual)
 
     cliente_busqueda = request.GET.get('cliente', '').strip()
     if cliente_busqueda:
@@ -428,14 +493,24 @@ def agendar_cita_admin(request):
     else:
         estado_filtro = ''
 
-    asignaciones = list(ServicioPersonal.objects.all())
+    asignaciones_query = ServicioPersonal.objects.all()
+    if personal_actual:
+        asignaciones_query = asignaciones_query.filter(id_personal = personal_actual)
+    asignaciones = list(asignaciones_query)
     dias = []
     for offset in range((fin_periodo - inicio_periodo).days + 1):
         dia = inicio_periodo + timedelta(days=offset)
+        reservas_dia_query = Reserva.objects.filter(
+            fecha=dia
+            ).exclude(
+                estado='cancelado'
+                ).select_related(
+                    'id_personal_servicio'
+                    )
+        if personal_actual:
+            reservas_dia_query = reservas_dia_query.filter(id_personal=personal_actual)
         reservas_dia = list(
-            Reserva.objects.filter(fecha=dia).exclude(
-                estado='cancelado',
-            ).select_related('id_personal_servicio')
+            reservas_dia_query
         )
         horas_disponibles = []
         for hora, _ in HORARIOS_DISPONIBLES:
@@ -462,10 +537,16 @@ def agendar_cita_admin(request):
             'fecha': dia,
             'horas': horas_disponibles,
         })
+    servicios = Servicio.objects.order_by('nombre_s')
+
+    if personal_actual:
+        servicios = servicios.filter(
+            personal_asignado__id_personal=personal_actual
+        ).distinct()
 
     return render(request, 'agendar_cita_admin.html', {
         'reservas': query.order_by('fecha', 'hora', 'id_personal__nombre'),
-        'servicios': Servicio.objects.order_by('nombre_s'),
+        'servicios': servicios,
         'disponibilidad': dias,
         'fecha_seleccionada': fecha_seleccionada,
         'vista': vista,
@@ -476,7 +557,7 @@ def agendar_cita_admin(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def clientes_admin(request):
     query = request.GET.get('q')
     if query:
@@ -498,7 +579,7 @@ def clientes_admin(request):
     return render(request, 'clientes_admin.html', {'clientes': page_obj})
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def servicios_admin(request):
     servicios = Servicio.objects.select_related('categoria').annotate(
         precio_minimo=Min('personal_asignado__precio'),
@@ -514,7 +595,7 @@ def servicios_admin(request):
     return render(request, 'servicios_admin.html', {'servicios': page_obj})
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def profesionales_admin(request):
     profesionales = Personal.objects.select_related('id_rol').order_by('nombre')
     paginator = Paginator(profesionales, 10)  # 10 RESULTADOS PAGINA
@@ -525,7 +606,7 @@ def profesionales_admin(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def profesional_crear(request):
 
     puede_otorgar_accesos = request.user.is_superuser
@@ -576,7 +657,7 @@ def profesional_crear(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def profesionales_editar(request, pk):
     profesional = get_object_or_404(Personal, pk=pk)
     if request.method == 'POST':
@@ -599,7 +680,7 @@ def profesionales_editar(request, pk):
     })
 
 @never_cache
-@user_passes_test(es_admin, login_url='acceso_denegado')
+@requiere_rol(es_admin)
 def profesional_eliminar(request, pk):
     profesional = get_object_or_404(Personal, pk=pk)
     if request.method == 'GET':
@@ -633,7 +714,7 @@ def profesional_eliminar(request, pk):
     return redirect('profesionales_admin')
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def rol_crear(request):
     if request.method == 'POST':
         form = RolForm(request.POST)
@@ -653,7 +734,7 @@ def rol_crear(request):
     return render(request, 'rol_form.html', {'form': form})
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def servicio_crear(request):
     if request.method == 'POST':
         form = ServicioForm(request.POST)
@@ -676,7 +757,7 @@ def servicio_crear(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def servicio_editar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
     if request.method == 'POST':
@@ -701,7 +782,7 @@ def servicio_editar(request, pk):
         })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def editar_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
@@ -720,7 +801,7 @@ def editar_cliente(request, pk):
     return render(request, 'forms/editar_clientes.html', {'form': form, 'cliente': cliente})
 
 @never_cache
-@user_passes_test(es_admin, login_url='acceso_denegado')
+@requiere_rol(es_admin)
 def servicio_eliminar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
     if request.method == 'GET':
@@ -747,7 +828,7 @@ def servicio_eliminar(request, pk):
 
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def categoria_servicio_crear(request):
     if request.method == 'POST':
         form = CategoriaServicioForm(request.POST)
@@ -769,7 +850,7 @@ def categoria_servicio_crear(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def etiquetas_admin(request):
     if request.method == 'POST':
         form = EtiquetaForm(request.POST)
@@ -792,7 +873,7 @@ def etiquetas_admin(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def etiqueta_editar(request, pk):
     etiqueta = get_object_or_404(Etiqueta, pk=pk)
     if request.method == 'POST':
@@ -811,7 +892,7 @@ def etiqueta_editar(request, pk):
     return render(request, 'etiqueta/etiquetas_editar.html', {'form': form, 'etiqueta': etiqueta})
 
 @never_cache
-@user_passes_test(es_admin, login_url='acceso_denegado')
+@requiere_rol(es_admin)
 def etiqueta_eliminar(request, pk):
     etiqueta = get_object_or_404(Etiqueta, pk=pk)
     if request.method == 'GET':
@@ -833,7 +914,7 @@ def etiqueta_eliminar(request, pk):
 
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def notificaciones_admin(request):
     notificacion = Notificacion.objects.select_related(
         'id_cliente',
@@ -848,7 +929,7 @@ def notificaciones_admin(request):
     })
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def auditoria_admin(request):
     auditoria = RegistrosAuditoria.objects.order_by('-fecha').select_related('id_personal')
     paginator = Paginator(auditoria, 10)
@@ -860,7 +941,7 @@ def auditoria_admin(request):
 
 
 @never_cache
-@user_passes_test(es_staff, login_url='login')
+@requiere_rol(es_admin)
 def configuracion_admin(request):
     return render(request, 'configuracion_admin.html')
 

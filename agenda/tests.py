@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -117,6 +117,7 @@ class ServicioAdminTests(TestCase):
             'password': 'Profesional!23',
         })
         self.assertRedirects(login_response, reverse('agendar_cita_admin'))
+        self.client.force_login(self.admin)
         self.client.post(reverse('rol_crear'), {
             'nombre_rol': 'Rol auditado',
             'descripcion': 'Acción registrada.',
@@ -124,7 +125,7 @@ class ServicioAdminTests(TestCase):
         self.assertTrue(
             RegistrosAuditoria.objects.filter(
                 accion='Se creó el rol "Rol auditado".',
-                id_personal=profesional,
+                id_personal=None,
             ).exists()
         )
         formulario_servicio = self.client.get(reverse('servicio_crear'))
@@ -975,6 +976,117 @@ class AdminLoginRedirectTests(TestCase):
 
         self.assertRedirects(response, reverse('agendar_cita_admin'))
 
+    def test_profesional_ve_solo_navegacion_del_personal(self):
+        rol = Rol.objects.create(
+            nombre_rol='Estilista',
+            descripcion='',
+        )
+        usuario = get_user_model().objects.create_user(
+            username='Profesional limitado',
+            password='test-password',
+            is_staff=False,
+        )
+        Personal.objects.create(
+            nombre='Profesional limitado',
+            credenciales='',
+            años_experiencia=1,
+            id_rol=rol,
+            usuario=usuario,
+        )
+        self.client.force_login(usuario)
+
+        response = self.client.get(reverse('agendar_cita_admin'))
+
+        self.assertContains(response, 'Agenda')
+        self.assertNotContains(response, 'Clientes')
+        self.assertNotContains(response, 'Profesionales')
+        self.assertNotContains(response, 'Servicios')
+        self.assertNotContains(response, 'Etiquetas')
+        self.assertNotContains(response, 'Notificaciones')
+        self.assertNotContains(response, 'Auditoría')
+        self.assertNotContains(response, 'Configuración')
+
+    def test_profesional_solo_ve_sus_reservas_en_la_agenda(self):
+        rol = Rol.objects.create(
+            nombre_rol='Estilista',
+            descripcion='',
+        )
+        usuario = get_user_model().objects.create_user(
+            username='Profesional limitado',
+            password='test-password',
+            is_staff=False,
+        )
+        personal = Personal.objects.create(
+            nombre='Profesional limitado',
+            credenciales='',
+            años_experiencia=1,
+            id_rol=rol,
+            usuario=usuario,
+        )
+        otro_personal = Personal.objects.create(
+            nombre='Otro profesional',
+            credenciales='',
+            años_experiencia=2,
+            id_rol=rol,
+        )
+        servicio = Servicio.objects.create(
+            nombre_s='Manicure',
+            descripcion='Cuidado de uñas',
+        )
+        asignacion = ServicioPersonal.objects.create(
+            id_personal=personal,
+            id_servicio=servicio,
+            duracion_aproximada=30,
+            precio=10000,
+        )
+        otra_asignacion = ServicioPersonal.objects.create(
+            id_personal=otro_personal,
+            id_servicio=servicio,
+            duracion_aproximada=30,
+            precio=10000,
+        )
+        cliente = Cliente.objects.create(
+            nombre_c='Cliente propio',
+            telefono='223344',
+            correo='propio@example.com',
+        )
+        otro_cliente = Cliente.objects.create(
+            nombre_c='Otro cliente',
+            telefono='556677',
+            correo='otro@example.com',
+        )
+        reserva = Reserva.objects.create(
+            fecha=timezone.localdate(),
+            hora=datetime.strptime('09:00', '%H:%M').time(),
+            id_cliente=cliente,
+            id_personal=personal,
+            id_personal_servicio=asignacion,
+        )
+        otra_reserva = Reserva.objects.create(
+            fecha=timezone.localdate(),
+            hora=datetime.strptime('10:00', '%H:%M').time(),
+            id_cliente=otro_cliente,
+            id_personal=otro_personal,
+            id_personal_servicio=otra_asignacion,
+        )
+        self.client.force_login(usuario)
+
+        response = self.client.get(reverse('agendar_cita_admin'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Cliente propio')
+        self.assertNotContains(response, 'Otro cliente')
+
+        own_detail = self.client.get(
+            reverse('reserva_detalle', args=[reserva.pk])
+        )
+        self.assertEqual(own_detail.status_code, 200)
+
+        other_detail = self.client.get(
+            reverse('reserva_detalle', args=[otra_reserva.pk])
+        )
+        self.assertEqual(other_detail.status_code, 403)
+
     def test_profesional_sin_permisos_accede_al_panel_sin_eliminar(self):
         rol = Rol.objects.create(
             nombre_rol='Estilista',
@@ -997,11 +1109,17 @@ class AdminLoginRedirectTests(TestCase):
         panel = self.client.get(reverse('agendar_cita_admin'))
         self.assertEqual(panel.status_code, 200)
         self.assertContains(panel, 'Agenda')
+        self.assertNotContains(panel, 'Clientes')
+        self.assertNotContains(panel, 'Profesionales')
+        self.assertNotContains(panel, 'Servicios')
+        self.assertNotContains(panel, 'Etiquetas')
+        self.assertNotContains(panel, 'Notificaciones')
+        self.assertNotContains(panel, 'Auditoría')
+        self.assertNotContains(panel, 'Configuración')
         self.assertNotContains(panel, 'reserva_eliminar')
 
         eliminado = self.client.post(reverse('servicio_eliminar', args=[1]))
-        self.assertEqual(eliminado.status_code, 302)
-        self.assertIn(reverse('acceso_denegado'), eliminado.url)
+        self.assertEqual(eliminado.status_code, 403)
 
     def test_enlace_de_administracion_abre_la_agenda(self):
         response = self.client.get(reverse('home'))
