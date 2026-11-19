@@ -11,16 +11,22 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!c$*&dtt)oa)bb%7j4b76d!%-+9xfux2ck!d#2%maz5wr1j-z#'
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError("La variable de entorno DJANGO_SECRET_KEY no está configurada.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'agenda'
+    'agenda',
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'rg_beauty.urls'
@@ -76,24 +84,49 @@ WSGI_APPLICATION = 'rg_beauty.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sistema_reservas',
-        'USER': 'root',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        ),
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'MinimumLengthValidator'
+        ),
+        'OPTIONS': {
+            'min_length': 8,
+        },
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'CommonPasswordValidator'
+        ),
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'NumericPasswordValidator'
+        ),
+    },
+    {
         'NAME': 'agenda.validators.PasswordRequirementsValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
@@ -124,3 +157,37 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# CONFIGURACION AXES
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # TIEMPO BLOQUEO HORAS
+AXES_RESET_ON_SUCCESS = True  
+AXES_LOCKOUT_PARAMETERS = [
+    ['username', 'ip_address'],
+]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'rg_beauty_cache',
+    }}
+
+# SEGURIDAD
+
+SECURE_BROWSER_XSS_FILTER = True # <- Habilita el filtro XSS en el navegador
+SECURE_SSL_REDIRECT = False # <- Redirige todas las solicitudes HTTP a HTTPS
+SESSION_COOKIE_HTTPONLY = True # <- Evita que el cookie de sesión sea accesible mediante JavaScript
+SESSION_COOKIE_SAMESITE = 'Lax' # <- Evita que el cookie de sesión sea enviado en solicitudes de terceros
+
+CSRF_COOKIE_SAMESITE = 'Lax' # <- Evita que el cookie CSRF sea enviado en solicitudes de terceros
+
+SECURE_CONTENT_TYPE_NOSNIFF = True # <- Evita que el navegador interprete el contenido de manera incorrecta
+
+X_FRAME_OPTIONS = 'DENY' # <- Evita que la página sea cargada en un iframe de otro dominio
+
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin' # <- Controla la información de referencia enviada en solicitudes de terceros

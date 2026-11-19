@@ -19,7 +19,7 @@ from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from .models import *
 from .utility import registrar_accion
-
+from django.views.decorators.cache import never_cache
 from django.core.paginator import Paginator
 
 def es_admin(user):
@@ -55,7 +55,7 @@ def home(request):
     ).order_by('nombre_s')
     return render(request, 'landing_publica.html', {'servicios': servicios})
 
-
+@never_cache
 @user_passes_test(es_cliente, login_url='login_cliente')
 def landing_cliente(request):
     cliente = get_object_or_404(Cliente, usuario=request.user)
@@ -77,6 +77,8 @@ def landing_cliente(request):
 def dashboard(request):
     return render(request, 'dashboard.html')
 
+@never_cache
+@user_passes_test(es_cliente, login_url='login_cliente')
 def ver_citas_cliente(request):
     cliente = None
     if request.user.is_authenticated and not request.user.is_staff:
@@ -154,14 +156,16 @@ def _reserva_permitida(request, pk):
         return None, render(request, 'acceso_denegado.html', status=403)
     return reserva, None
 
-
+@never_cache
+@user_passes_test(es_cliente, login_url='login_cliente')
 def reserva_detalle(request, pk):
     reserva, respuesta = _reserva_permitida(request, pk)
     if respuesta:
         return respuesta
     return render(request, 'reserva_detalle.html', {'reserva': reserva})
 
-
+@never_cache
+@user_passes_test(es_cliente, login_url='login_cliente')
 def reserva_editar(request, pk):
     reserva, respuesta = _reserva_permitida(request, pk)
     if respuesta:
@@ -195,6 +199,8 @@ def reserva_editar(request, pk):
         'es_admin': es_admin,
     })
 
+@never_cache
+@user_passes_test(es_cliente, login_url='login_cliente')
 def reserva_eliminar(request, pk):
     if (
         request.user.is_authenticated
@@ -225,6 +231,8 @@ def reserva_eliminar(request, pk):
         'agendar_cita_admin' if request.user.is_staff else 'ver_citas_cliente'
     )
 
+@never_cache
+@user_passes_test(es_cliente, login_url='login_cliente')
 def agendar_cita(request):
     cliente = None
     if request.user.is_authenticated and not request.user.is_staff:
@@ -342,9 +350,12 @@ def agendar_cita(request):
 
 #VISTA ADMINISTRACION
 
+@never_cache
+@user_passes_test(es_staff, login_url='login')
 def ver_citas(request):
     return render(request, 'ver_citas_cliente.html')
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def vista_administracion(request):
     hoy = timezone.localdate()
@@ -367,6 +378,7 @@ def vista_administracion(request):
         'tasa_cancelacion': tasa_cancelacion,
     })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def agendar_cita_admin(request):
     hoy = timezone.localdate()
@@ -464,6 +476,7 @@ def agendar_cita_admin(request):
         'estados': estados,
     })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def clientes_admin(request):
     query = request.GET.get('q')
@@ -485,6 +498,7 @@ def clientes_admin(request):
 
     return render(request, 'clientes_admin.html', {'clientes': page_obj})
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def servicios_admin(request):
     servicios = Servicio.objects.select_related('categoria').annotate(
@@ -500,6 +514,7 @@ def servicios_admin(request):
 
     return render(request, 'servicios_admin.html', {'servicios': page_obj})
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def profesionales_admin(request):
     profesionales = Personal.objects.select_related('id_rol').order_by('nombre')
@@ -510,6 +525,7 @@ def profesionales_admin(request):
         'profesionales': page_obj,
     })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def profesional_crear(request):
 
@@ -561,6 +577,7 @@ def profesional_crear(request):
         'accion': 'Guardar profesional',
     })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def profesionales_editar(request, pk):
     profesional = get_object_or_404(Personal, pk=pk)
@@ -583,6 +600,7 @@ def profesionales_editar(request, pk):
         'accion': 'Guardar cambios',
     })
 
+@never_cache
 @user_passes_test(es_admin, login_url='acceso_denegado')
 def profesional_eliminar(request, pk):
     profesional = get_object_or_404(Personal, pk=pk)
@@ -616,7 +634,7 @@ def profesional_eliminar(request, pk):
     )
     return redirect('profesionales_admin')
 
-
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def rol_crear(request):
     if request.method == 'POST':
@@ -636,6 +654,7 @@ def rol_crear(request):
         form = RolForm()
     return render(request, 'rol_form.html', {'form': form})
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def servicio_crear(request):
     if request.method == 'POST':
@@ -658,6 +677,7 @@ def servicio_crear(request):
         'accion': 'Crear servicio',
     })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def servicio_editar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
@@ -682,6 +702,7 @@ def servicio_editar(request, pk):
         'servicio': servicio,
         })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def editar_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
@@ -700,6 +721,7 @@ def editar_cliente(request, pk):
         form = ClienteUpdateForm(instance=cliente)
     return render(request, 'forms/editar_clientes.html', {'form': form, 'cliente': cliente})
 
+@never_cache
 @user_passes_test(es_admin, login_url='acceso_denegado')
 def servicio_eliminar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
@@ -726,6 +748,7 @@ def servicio_eliminar(request, pk):
     return redirect('servicios_admin')
 
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def categoria_servicio_crear(request):
     if request.method == 'POST':
@@ -747,7 +770,7 @@ def categoria_servicio_crear(request):
         'form': form,
     })
 
-
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def etiquetas_admin(request):
     if request.method == 'POST':
@@ -770,6 +793,7 @@ def etiquetas_admin(request):
         'etiquetas': Etiqueta.objects.order_by('nombre'),
     })
 
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def etiqueta_editar(request, pk):
     etiqueta = get_object_or_404(Etiqueta, pk=pk)
@@ -788,7 +812,7 @@ def etiqueta_editar(request, pk):
         form = EtiquetaForm(instance=etiqueta)
     return render(request, 'etiqueta/etiquetas_editar.html', {'form': form, 'etiqueta': etiqueta})
 
-
+@never_cache
 @user_passes_test(es_admin, login_url='acceso_denegado')
 def etiqueta_eliminar(request, pk):
     etiqueta = get_object_or_404(Etiqueta, pk=pk)
@@ -809,6 +833,8 @@ def etiqueta_eliminar(request, pk):
     messages.success(request, 'La etiqueta se eliminó correctamente.')
     return redirect('etiquetas_admin')
 
+
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def notificaciones_admin(request):
     notificacion = Notificacion.objects.select_related(
@@ -823,7 +849,7 @@ def notificaciones_admin(request):
         'notificaciones': page_obj,
     })
 
-
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def auditoria_admin(request):
     auditoria = RegistrosAuditoria.objects.order_by('-fecha').select_related('id_personal')
@@ -835,7 +861,7 @@ def auditoria_admin(request):
     })
 
 
-
+@never_cache
 @user_passes_test(es_staff, login_url='login')
 def configuracion_admin(request):
     return render(request, 'configuracion_admin.html')
@@ -927,6 +953,7 @@ def login_cliente(request):
 def registro_cliente(request):
     return redirect('login_cliente')
 
+@never_cache
 @user_passes_test(es_cliente, login_url='login_cliente')
 def mi_cuenta(request):
     cliente = get_object_or_404(Cliente, usuario=request.user)
@@ -956,6 +983,7 @@ def mi_cuenta(request):
         form = ClienteUpdateForm(instance=cliente)
     return render(request, 'mi_cuenta.html', {'form': form, 'cliente': cliente})
 
+@never_cache
 @user_passes_test(es_cliente, login_url='login_cliente')
 def eliminar_cuenta_cliente(request):
     cliente = get_object_or_404(Cliente, usuario=request.user)
