@@ -232,7 +232,6 @@ def reserva_eliminar(request, pk):
     )
 
 @never_cache
-@user_passes_test(es_cliente, login_url='login_cliente')
 def agendar_cita(request):
     cliente = None
     if request.user.is_authenticated and not request.user.is_staff:
@@ -551,12 +550,11 @@ def profesional_crear(request):
                     username=personal.nombre,
                     is_staff=tiene_acceso_admin,
                 )
-            usuario.set_password(form.cleaned_data['password'])
-            usuario.save()
+                usuario.set_password(form.cleaned_data['password'])
+                usuario.save()
 
-            personal.usuario = usuario
-            personal.password = usuario.password
-            personal.save()
+                personal.usuario = usuario
+                personal.save()
 
             registrar_accion(
                 request.user,
@@ -910,6 +908,8 @@ def login_view(request):
         form = AutenticacionForm()
     return render(request, 'login_admin.html', {'form': form})
 
+def verificar_codigo(request):
+    return render(request, 'forms/codigo_verificacion.html')
 
 def logout_view(request):
     logout(request)

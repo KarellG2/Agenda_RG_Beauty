@@ -193,6 +193,14 @@ class RolForm(forms.ModelForm):
 
 
 class PersonalForm(forms.ModelForm):
+    password = forms.CharField(
+        label='Contraseña',
+        help_text=(
+            'Debe tener al menos 8 caracteres, una mayúscula, '
+            'un número y un carácter especial.'
+        ),
+        widget=forms.PasswordInput(attrs={'class': 'admin-field'}),
+    )
     puede_administrar = forms.BooleanField(
         required = False,
         initial = False,
@@ -214,12 +222,6 @@ class PersonalForm(forms.ModelForm):
             'id_rol': 'Cargo o especialidad',
             'password': 'Contraseña',
         }
-        help_texts = {
-            'password': (
-                'Debe tener al menos 8 caracteres, una mayúscula, '
-                'un número y un carácter especial.'
-            ),
-        }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'admin-field'}),
             'credenciales': forms.TextInput(attrs={'class': 'admin-field'}),
@@ -228,7 +230,6 @@ class PersonalForm(forms.ModelForm):
                 'min': 0,
             }),
             'id_rol': forms.Select(attrs={'class': 'admin-field'}),
-            'password': forms.PasswordInput(attrs={'class': 'admin-field'}),
         }
         error_messages = {
             'nombre': {'required': 'Ingresa el nombre del profesional.'},

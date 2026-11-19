@@ -38,6 +38,19 @@ class ServicioAdminTests(TestCase):
             id_rol=rol,
         )
 
+    def test_crear_superusuario_crea_personal_asociado(self):
+        superusuario = get_user_model().objects.create_superuser(
+            username='superadministrador',
+            email='admin@example.com',
+            password='test-password',
+        )
+
+        personal = Personal.objects.get(usuario=superusuario)
+        self.assertEqual(personal.nombre, 'superadministrador')
+        self.assertEqual(personal.id_rol.nombre_rol, 'Superadministrador')
+        self.assertEqual(personal.credenciales, 'Superusuario')
+        self.assertEqual(personal.años_experiencia, 0)
+
     def test_crear_servicio(self):
         categoria = CategoriaServicio.objects.create(nombre='Cuidado de uñas')
         response = self.client.post(reverse('servicio_crear'), {

@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.db import models
 
@@ -46,7 +45,6 @@ class Personal(models.Model):
     nombre = models.CharField(max_length=100)
     credenciales = models.CharField(max_length=255)
     años_experiencia = models.PositiveIntegerField()
-    password = models.CharField(max_length=128)
 
     id_rol = models.ForeignKey(
         Rol,
