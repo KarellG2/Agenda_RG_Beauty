@@ -27,3 +27,5 @@ Para ejecutar las pruebas:
 py manage.py test agenda
 ```
 o desde la cmd
+
+en caso que de este error django.db.utils.NotSupportedError: MySQL 8.4 or later is required (found 8.0.46). Cambiar la version de django a la 5.2
